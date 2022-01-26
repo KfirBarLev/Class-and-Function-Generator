@@ -3,7 +3,7 @@
 This is the README for your extension "class-generator". After writing up a brief description, we recommend including the following sections.
 
 ## Features
-
+# bknfldklhfdlghfdlghfdlg
 Describe specific features of your extension including screenshots of your extension in action. Image paths are relative to this README file.
 
 For example if there is an image subfolder under your extension project workspace:
