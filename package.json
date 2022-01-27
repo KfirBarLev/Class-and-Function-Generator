@@ -10,14 +10,28 @@
 		"Other"
 	],
 	"activationEvents": [
-        "onCommand:class-generator.helloWorld"
+        "onStartupFinished"
 	],
 	"main": "./out/extension.js",
 	"contributes": {
 		"commands": [
 			{
-				"command": "class-generator.helloWorld",
-				"title": "Hello World"
+				"command": "class-generator.CreateClass",
+				"title": "Create C++ Class"
+			}
+		],
+		"menus": {
+			"explorer/context": [
+				{
+					"group": "navigation@-1",
+					"command": "class-generator.CreateClass"
+				}
+			]
+		},
+		"keybindings": [
+			{
+				"command": "class-generator.CreateClass",
+				"key": "alt+c"
 			}
 		]
 	},
