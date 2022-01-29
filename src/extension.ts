@@ -9,7 +9,7 @@ async function createNameInput()
 	var option: vscode.InputBoxOptions = 
 	{
 		ignoreFocusOut: false,
-		placeHolder: "foo it in the bar.",
+		placeHolder: "Type your class name.",
 		prompt: "Type your class name"
 	};
 
@@ -34,7 +34,9 @@ function canContinue(res: any)
 
 function hppText(name: string)
 {
-	var className = name[0].toUpperCase() + name.substring(1);
+	//var className = name[0].toUpperCase() + name.substring(1); // case we want to be sure first letter is big rest small
+
+	var className = name;
 	const ifndefHead = 
 	`#ifndef `+name.toUpperCase()+`_HPP
 #define `+name.toUpperCase()+`_HPP`;
@@ -61,8 +63,9 @@ class ` + className +`
 
 function cppText(name: string)
 {
-	var className = name[0].toUpperCase() + name.substring(1);
+	//var className = name[0].toUpperCase() + name.substring(1); // case we want to be sure first letter is big rest small
 
+	var className = name;
 	var hppName = name + ".hpp";
 	var cppBuffer =
 	`#include "` + hppName + `"  
@@ -151,7 +154,7 @@ export function activate(context: vscode.ExtensionContext) {
 			return;
 		} // check for class name
 
-		res = res.toLowerCase();
+		//res = res.toLowerCase(); // case we want only lower case file name
 
 		let dir :string ; //vscode.workspace.getConfiguration().get("cpp.creator.setPath");
 		// If it's called via the context menu, it's gonna have the _fsPath set from where you're clicking

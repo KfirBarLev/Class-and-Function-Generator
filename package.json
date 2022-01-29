@@ -1,59 +1,91 @@
 {
-  "name": "class-generator",
-	"displayName": "Class_Generator",
-	"description": "create class and generate function for the class",
-	"version": "0.0.1",
-	"engines": {
-		"vscode": "^1.63.0"
-	},
-	"categories": [
-		"Other"
-	],
-	"activationEvents": [
-        "onStartupFinished"
-	],
-	"main": "./out/extension.js",
-	"contributes": {
-		"commands": [
-			{
-				"command": "class-generator.CreateClass",
-				"title": "Create C++ Class"
-			}
-		],
-		"menus": {
+	"name": "class-generator",
+	  "displayName": "Class_Generator",
+	  "description": "create class and generate function for the class",
+	  "version": "0.0.1",
+	  "engines": {
+		  "vscode": "^1.63.0"
+	  },
+	  "categories": [
+		  "Other"
+	  ],
+	  "activationEvents": [
+		  "onStartupFinished"
+	  ],
+	  "main": "./out/extension.js",
+	  "contributes": {
+		  "commands": [
+			  {
+				  "command": "class-generator.CreateClass",
+				  "title": "Create C++ Class"
+			  },
+			  {
+			 	"command": "class-generator.SourceFile",
+				"title": "C/C++ Source File"
+			  },
+			  {
+				"command": "class-generator.HeaderFile",
+				"title": "C/C++ Header File"
+			  },
+			  {
+				"command": "class-generator.HeaderAndSourceFiles",
+				"title": "C/C++ Header And Source Files"
+			  }
+		  ],
+		  "menus": {
 			"explorer/context": [
 				{
-					"group": "navigation@-1",
-					"command": "class-generator.CreateClass"
+				  "submenu": "class-generator.stage",
+				  "group": "navigation"
 				}
+			  ],
+			  "class-generator.stage": [
+				{
+				  "command": "class-generator.CreateClass",
+				  "group": "navigation"
+				},
+				{
+					"command": "class-generator.SourceFile",
+					"group": "navigation"
+				},
+				{
+					"command": "class-generator.HeaderFile",
+					"group": "navigation"
+				},
+				{
+					"command": "class-generator.HeaderAndSourceFiles",
+					"group": "navigation"
+				}
+			  ]
+			},
+			"submenus": [
+			  {
+				"id": "class-generator.stage",
+				"label": "New",
+				"icon": "$(something)"
+			  }
 			]
-		},
-		"keybindings": [
-			{
-				"command": "class-generator.CreateClass",
-				"key": "alt+c"
-			}
-		]
-	},
-	"scripts": {
-		"vscode:prepublish": "npm run compile",
-		"compile": "tsc -p ./",
-		"watch": "tsc -watch -p ./",
-		"pretest": "npm run compile && npm run lint",
-		"lint": "eslint src --ext ts",
-		"test": "node ./out/test/runTest.js"
-	},
-	"devDependencies": {
-		"@types/vscode": "^1.63.0",
-		"@types/glob": "^7.2.0",
-		"@types/mocha": "^9.0.0",
-		"@types/node": "14.x",
-		"@typescript-eslint/eslint-plugin": "^5.9.1",
-		"@typescript-eslint/parser": "^5.9.1",
-		"eslint": "^8.6.0",
-		"glob": "^7.2.0",
-		"mocha": "^9.1.3",
-		"typescript": "^4.5.4",
-		"@vscode/test-electron": "^2.0.3"
-	}
-}
+	  },
+	  "scripts": {
+		  "vscode:prepublish": "npm run compile",
+		  "compile": "tsc -p ./",
+		  "watch": "tsc -watch -p ./",
+		  "pretest": "npm run compile && npm run lint",
+		  "lint": "eslint src --ext ts",
+		  "test": "node ./out/test/runTest.js"
+	  },
+	  "devDependencies": {
+		  "@types/vscode": "^1.63.0",
+		  "@types/glob": "^7.2.0",
+		  "@types/mocha": "^9.0.0",
+		  "@types/node": "14.x",
+		  "@typescript-eslint/eslint-plugin": "^5.9.1",
+		  "@typescript-eslint/parser": "^5.9.1",
+		  "eslint": "^8.6.0",
+		  "glob": "^7.2.0",
+		  "mocha": "^9.1.3",
+		  "typescript": "^4.5.4",
+		  "@vscode/test-electron": "^2.0.3"
+	  }
+  }
+  
