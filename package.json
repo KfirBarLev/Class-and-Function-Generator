@@ -21,15 +21,15 @@
 			  },
 			  {
 			 	"command": "class-generator.SourceFile",
-				"title": "C/C++ Source File"
+				"title": "Create C++ Source File"
 			  },
 			  {
 				"command": "class-generator.HeaderFile",
-				"title": "C/C++ Header File"
+				"title": "Create C++ Header File"
 			  },
 			  {
 				"command": "class-generator.HeaderAndSourceFiles",
-				"title": "C/C++ Header And Source Files"
+				"title": "Create C++ Source And Assoiated Header"
 			  }
 		  ],
 		  "menus": {
@@ -42,19 +42,19 @@
 			  "class-generator.stage": [
 				{
 				  "command": "class-generator.CreateClass",
-				  "group": "navigation"
+				  "group": "navigation@-4"
 				},
 				{
 					"command": "class-generator.SourceFile",
-					"group": "navigation"
+					"group": "navigation@-3"
 				},
 				{
 					"command": "class-generator.HeaderFile",
-					"group": "navigation"
+					"group": "navigation@-2"
 				},
 				{
 					"command": "class-generator.HeaderAndSourceFiles",
-					"group": "navigation"
+					"group": "navigation@-1"
 				}
 			  ]
 			},

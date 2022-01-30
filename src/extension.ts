@@ -9,8 +9,8 @@ async function createNameInput()
 	var option: vscode.InputBoxOptions = 
 	{
 		ignoreFocusOut: false,
-		placeHolder: "Type your class name.",
-		prompt: "Type your class name"
+		placeHolder: "Type your class or file name.",
+		prompt: "Type your class or file name."
 	};
 
 	return vscode.window.showInputBox(option);
@@ -32,16 +32,17 @@ function canContinue(res: any)
 	return true;
 }
 
-function hppText(name: string)
+function hppText(name: string, createClass: boolean)
 {
-	//var className = name[0].toUpperCase() + name.substring(1); // case we want to be sure first letter is big rest small
-
 	var className = name;
 	const ifndefHead = 
 	`#ifndef `+name.toUpperCase()+`_HPP
 #define `+name.toUpperCase()+`_HPP`;
+var defaultInfo = '';
 
-const defaultInfo = `
+ if (createClass)
+ {
+ defaultInfo = `
 
 class ` + className +`  
 {	
@@ -52,7 +53,7 @@ class ` + className +`
 	private:
 
 };`;
-
+ }
 	const ifndefEnd= `
 
 #endif // `+name.toUpperCase()+`_HPP
@@ -61,13 +62,15 @@ class ` + className +`
 	return ifndefHead + defaultInfo + ifndefEnd;			
 }
 
-function cppText(name: string)
+function cppText(name: string, createClass: boolean)
 {
-	//var className = name[0].toUpperCase() + name.substring(1); // case we want to be sure first letter is big rest small
-
 	var className = name;
 	var hppName = name + ".hpp";
-	var cppBuffer =
+	var cppBuffer = '';
+
+	if (createClass)
+	{
+	cppBuffer =
 	`#include "` + hppName + `"  
 		
 `+className+`::`+ className +`()
@@ -80,16 +83,22 @@ function cppText(name: string)
 	
 }
 `;
+	}
+	// else
+	// {
+	// cppBuffer =
+	// `#include "` + hppName + `"  `;	
+	// }
 
 	return cppBuffer;
 }
 
-function createFile(name: string, dir: string, type: string)
+function createFile(name: string, dir: string, type: string, createClass: boolean)
 {
+	var cppName = dir + "\\" + name + '.cpp';
 	if ("cpp" === type)
 	{
-		var cppBuffer = cppText(name);
-		var cppName = dir + "\\" + name + '.cpp';
+		var cppBuffer = cppText(name, createClass);		
 		fs.writeFile(cppName, cppBuffer, function (err)
 		{
 			if (err) 
@@ -101,7 +110,7 @@ function createFile(name: string, dir: string, type: string)
 	}
 	else
 	{
-		var hppBuffer = hppText(name);
+		var hppBuffer = hppText(name, createClass);
 		var hppName = dir + "\\" + name + ".hpp";
 		fs.writeFile(hppName, hppBuffer, function (err)
 		{
@@ -111,19 +120,39 @@ function createFile(name: string, dir: string, type: string)
 			}
 		});
 
+		if ("both" === type)
+		{
+	cppBuffer =
+	`#include "` + name + ".hpp" + `"  `;	
+		fs.writeFile(cppName, cppBuffer, function (err)
+		{
+			if (err) {
+				console.error(err);
+				return false;
+			}
+		});
+		}
 	}
 	
 
 	return true;
 }
 
-function createClass(name: string, dir: string)
+function createClass(name: string, dir: string, createClass: boolean, fileType: string)
 {
-	
-	var hppFile = createFile(name, dir, "hpp");
-	var cppFile = createFile(name, dir, "cpp");
-
-	return (hppFile && cppFile);
+	switch(fileType)
+	{
+		case "hpp":
+			var hppFile = createFile(name, dir, "hpp", createClass);
+			return hppFile;
+		case "cpp":
+			var cppFile = createFile(name, dir, "cpp", createClass);
+			return cppFile;
+		case "both":
+			var hppFile = createFile(name, dir, "both", createClass);
+			var cppFile = createFile(name, dir, "cpp", createClass);
+			return (hppFile && cppFile);
+	}	
 }
 
 
@@ -138,6 +167,8 @@ export function activate(context: vscode.ExtensionContext) {
 	// The command has been defined in the package.json file
 	// Now provide the implementation of the command with registerCommand
 	// The commandId parameter must match the command field in package.json
+
+	// create Class And Associated Header
 	let disposable = vscode.commands.registerCommand('class-generator.CreateClass', async (args) => {
 
 		// The code you place here will be executed every time your command is executed
@@ -152,11 +183,9 @@ export function activate(context: vscode.ExtensionContext) {
 		if(!canContinue(res))
 		{ 
 			return;
-		} // check for class name
+		} // check for class or file name
 
-		//res = res.toLowerCase(); // case we want only lower case file name
-
-		let dir :string ; //vscode.workspace.getConfiguration().get("cpp.creator.setPath");
+		let dir :string ;
 		// If it's called via the context menu, it's gonna have the _fsPath set from where you're clicking
 		// eslint-disable-next-line eqeqeq
 		if (args != null && args._fsPath != null) 
@@ -168,7 +197,7 @@ export function activate(context: vscode.ExtensionContext) {
 
 				if (!stats.isDirectory()) 
 				{
-					//If it's not a directory then it's the file so get the parent directory
+					//If it's not a directory then it's file, so get the parent directory
 					dir = path.dirname(args._fsPath);
 				}
 			}
@@ -178,7 +207,7 @@ export function activate(context: vscode.ExtensionContext) {
 			dir = vscode.workspace.rootPath as string; // use workspace path
 		}
 
-		var out = createClass(res as string, dir as string); 
+		var out = createClass(res as string, dir as string, true, "both"); 
 
 		// Display a message box to the user
 		if (out)
@@ -188,6 +217,165 @@ export function activate(context: vscode.ExtensionContext) {
 		else
 		{
 			vscode.window.showInformationMessage(res + " Class not created!");
+		}
+		
+	});
+
+	// create Source File 
+	disposable = vscode.commands.registerCommand('class-generator.SourceFile', async (args) => {
+
+		// The code you place here will be executed every time your command is executed
+		var res = await createNameInput();
+
+		if (res === undefined)
+		{
+			vscode.window.showErrorMessage("Your Files could not be created!");
+			return;
+		}
+
+		if(!canContinue(res))
+		{ 
+			return;
+		} // check for class or file name
+
+		let dir :string ;
+		// If it's called via the context menu, it's gonna have the _fsPath set from where you're clicking
+		// eslint-disable-next-line eqeqeq
+		if (args != null && args._fsPath != null) 
+		{
+			dir = args._fsPath;
+			if (typeof dir === "string" && fs.existsSync(dir)) 
+			{
+				var stats = fs.lstatSync(dir);
+
+				if (!stats.isDirectory()) 
+				{
+					//If it's not a directory then it's file, so get the parent directory
+					dir = path.dirname(args._fsPath);
+				}
+			}
+		}
+		else // case user not chose any dir/path
+		{
+			dir = vscode.workspace.rootPath as string; // use workspace path
+		}
+
+		var out = createClass(res as string, dir as string, false, "cpp"); 
+
+		// Display a message box to the user
+		if (out)
+		{
+			vscode.window.showInformationMessage(res + " File create successfuly! in Path: " + dir);
+		}
+		else
+		{
+			vscode.window.showInformationMessage(res + " File not created!");
+		}
+		
+	});
+
+	// create Header File 
+	disposable = vscode.commands.registerCommand('class-generator.HeaderFile', async (args) => {
+
+		// The code you place here will be executed every time your command is executed
+		var res = await createNameInput();
+
+		if (res === undefined)
+		{
+			vscode.window.showErrorMessage("Your Files could not be created!");
+			return;
+		}
+
+		if(!canContinue(res))
+		{ 
+			return;
+		} // check for class or file name
+
+		let dir :string ;
+		// If it's called via the context menu, it's gonna have the _fsPath set from where you're clicking
+		// eslint-disable-next-line eqeqeq
+		if (args != null && args._fsPath != null) 
+		{
+			dir = args._fsPath;
+			if (typeof dir === "string" && fs.existsSync(dir)) 
+			{
+				var stats = fs.lstatSync(dir);
+
+				if (!stats.isDirectory()) 
+				{
+					//If it's not a directory then it's file, so get the parent directory
+					dir = path.dirname(args._fsPath);
+				}
+			}
+		}
+		else // case user not chose any dir/path
+		{
+			dir = vscode.workspace.rootPath as string; // use workspace path
+		}
+
+		var out = createClass(res as string, dir as string, false, "hpp"); 
+
+		// Display a message box to the user
+		if (out)
+		{
+			vscode.window.showInformationMessage(res + " File create successfuly! in Path: " + dir);
+		}
+		else
+		{
+			vscode.window.showInformationMessage(res + " File not created!");
+		}
+		
+	});
+
+	// create Source File And Associated Header
+	disposable = vscode.commands.registerCommand('class-generator.HeaderAndSourceFiles', async (args) => {
+
+		// The code you place here will be executed every time your command is executed
+		var res = await createNameInput();
+
+		if (res === undefined)
+		{
+			vscode.window.showErrorMessage("Your Files could not be created!");
+			return;
+		}
+
+		if(!canContinue(res))
+		{ 
+			return;
+		} // check for class or file name
+
+		let dir :string ;
+		// If it's called via the context menu, it's gonna have the _fsPath set from where you're clicking
+		// eslint-disable-next-line eqeqeq
+		if (args != null && args._fsPath != null) 
+		{
+			dir = args._fsPath;
+			if (typeof dir === "string" && fs.existsSync(dir)) 
+			{
+				var stats = fs.lstatSync(dir);
+
+				if (!stats.isDirectory()) 
+				{
+					//If it's not a directory then it's file, so get the parent directory
+					dir = path.dirname(args._fsPath);
+				}
+			}
+		}
+		else // case user not chose any dir/path
+		{
+			dir = vscode.workspace.rootPath as string; // use workspace path
+		}
+
+		var out = createClass(res as string, dir as string, false, "both"); 
+
+		// Display a message box to the user
+		if (out)
+		{
+			vscode.window.showInformationMessage(res + " Files create successfuly! in Path: " + dir);
+		}
+		else
+		{
+			vscode.window.showInformationMessage(res + " Files not created!");
 		}
 		
 	});
