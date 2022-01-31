@@ -30,16 +30,32 @@
 			  {
 				"command": "class-generator.HeaderAndSourceFiles",
 				"title": "Create C++ Source And Assoiated Header"
+			  },
+			  {
+				"command": "class-generator.Getter",
+				"title": "Add Getter"
+			  },
+			  {
+				"command": "class-generator.Setter",
+				"title": "Add Setter"
+			  },
+			  {
+				"command": "class-generator.GetterAndSetter",
+				"title": "Add Getter And Setter"
 			  }
 		  ],
 		  "menus": {
 			"explorer/context": [
 				{
-				  "submenu": "class-generator.stage",
-				  "group": "navigation"
+				  "submenu": "class-generator.NewFile",
+				  "group": "navigation@-2"
+				},
+				{
+					"submenu": "class-generator.Generate",
+					"group": "navigation@-1"
 				}
 			  ],
-			  "class-generator.stage": [
+			  "class-generator.NewFile": [
 				{
 				  "command": "class-generator.CreateClass",
 				  "group": "navigation@-4"
@@ -56,12 +72,31 @@
 					"command": "class-generator.HeaderAndSourceFiles",
 					"group": "navigation@-1"
 				}
-			  ]
+			  ],
+			  "class-generator.Generate": [
+				{
+				  "command": "class-generator.Getter",
+				  "group": "navigation@-3"
+				},
+				{
+					"command": "class-generator.Setter",
+					"group": "navigation@-2"
+				},
+				{
+					"command": "class-generator.GetterAndSetter",
+					"group": "navigation@-1"
+				}
+			]
 			},
 			"submenus": [
 			  {
-				"id": "class-generator.stage",
+				"id": "class-generator.NewFile",
 				"label": "New",
+				"icon": "$(something)"
+			  },
+			  {
+				"id": "class-generator.Generate",
+				"label": "Generate",
 				"icon": "$(something)"
 			  }
 			]
