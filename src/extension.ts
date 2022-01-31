@@ -29,7 +29,9 @@ export function activate(context: vscode.ExtensionContext) {
 												   async (args) => runCommand(args, false, "both")));
 
 	context.subscriptions.push(vscode.commands.registerCommand('class-generator.Getter', 
-												   async (args) => printSelection("hellllooooo!!!")));											   
+												   async (args) => printSelection()));
+												   
+											   
 }
 
 async function createNameInput()
@@ -238,9 +240,18 @@ async function runCommand(args: any, classCreate: boolean, fileType: string)
 		
 }
 
-function printSelection(selection: string)
+async function printSelection()
 {
-	console.log('selectionnnnnnnnnnnnnn');
+	const editor = vscode.window.activeTextEditor;
+	if (!editor) {
+		return;
+	}
+	
+	let {text} = editor.document.lineAt(editor.selection.active.line);
+	//let text = editor.document.getText(editor.selection);
+	vscode.window.showInformationMessage(text);
+	vscode.window.showInformationMessage("heyyyyyyyyyyyy");
+	
 }
 // this method is called when your extension is deactivated
 export function deactivate() {}

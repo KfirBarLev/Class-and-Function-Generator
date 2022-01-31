@@ -49,10 +49,6 @@
 				{
 				  "submenu": "class-generator.NewFile",
 				  "group": "navigation@-2"
-				},
-				{
-					"submenu": "class-generator.Generate",
-					"group": "navigation@-1"
 				}
 			  ],
 			  "class-generator.NewFile": [
@@ -73,6 +69,12 @@
 					"group": "navigation@-1"
 				}
 			  ],
+			  "editor/context": [
+				{
+					"submenu": "class-generator.Generate",
+					"group": "navigation@-1"
+				}
+			],
 			  "class-generator.Generate": [
 				{
 				  "command": "class-generator.Getter",
