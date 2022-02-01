@@ -4,9 +4,10 @@ import * as vscode from 'vscode';
 import * as fs from 'fs';
 import * as path from 'path';
 
+
 // this method is called when your extension is activated
 // your extension is activated the very first time the command is executed
-export function activate(context: vscode.ExtensionContext) {
+export function activate(context: vscode.ExtensionContext): void {
 	
 	// Use the console to output diagnostic information (console.log) and errors (console.error)
 	// This line of code will only be executed once when your extension is activated
@@ -232,26 +233,91 @@ async function runCommand(args: any, classCreate: boolean, fileType: string)
 		else
 		{
 			vscode.window.showInformationMessage(res + " not created!");
-		}
-
-		///
-		const editor = vscode.window.activeTextEditor;
-		
-		
+		}		
 }
 
 async function printSelection()
 {
+	// get the currently open file
 	const editor = vscode.window.activeTextEditor;
-	if (!editor) {
+	
+	if (!editor) 
+	{
 		return;
 	}
 	
-	let {text} = editor.document.lineAt(editor.selection.active.line);
-	//let text = editor.document.getText(editor.selection);
-	vscode.window.showInformationMessage(text);
-	vscode.window.showInformationMessage("heyyyyyyyyyyyy");
+	const hasSelection = editor.selection.active.character;
+	var text: vscode.TextLine;
+
+	// check if the user selected something, otherwise display error message
+	if (hasSelection) 
+	{
+		text = editor.document.lineAt(editor.selection.active.line);
+		let codeText = generateGetterSetterAutomatically(text.text, "getter");
+
+		if (!codeText) 
+		{
+			vscode.window.showErrorMessage('generateGetterSetterAutomatically faild!');
+			return;
+		}
+
+		vscode.window.showInformationMessage(codeText);
+	}
+	else
+	{
+		vscode.window.showErrorMessage('Nothing was selected!');
+	}
 	
 }
+
+function generateGetterSetterAutomatically(text: any, func: string) // func="getter"/"setter"/"both"
+{
+	let selectedTextArray = text.split('\r\n').filter((e: any) => e); //removes empty array values (line breaks)
+	let generatedCode = '';
+
+	for (const text of selectedTextArray) 
+	{
+		let selectedText, indentSize, variableType, variableName;
+
+		selectedText = text.replace(';', '').trim(); //removes all semicolons 
+		indentSize = text.split(selectedText.charAt(0))[0]; //get the indent size for proper formatting
+		 
+		variableType = selectedText.split(' ')[0];
+		variableName = selectedText.split(' ')[1];	
+		
+		if (variableName === null || variableName === undefined) 
+		{
+			vscode.window.showErrorMessage('Faulty Selection. Please make sure you select a variable.');
+			return; 
+		}
+
+		variableName.trim();
+		variableType.trim();
+		
+		let code = '';
+		
+		let variableNameUp = variableName.charAt(0).toUpperCase() + variableName.slice(1);
+		let getter: string = '', setter: string = '';
+
+		if (func === "both") 
+		{
+			code = getter + setter;		
+		} 
+		else if (func === "getter")
+		{
+			getter = "hello world!!!!!!!!!";
+			code = getter;
+		} 
+		else if (func === "setter")
+		{	
+			code = setter;			
+		}
+
+		generatedCode += code; //append the code for each selected line
+	}
+
+	return generatedCode;
+}
+
 // this method is called when your extension is deactivated
 export function deactivate() {}
