@@ -115,13 +115,26 @@ function cppText(name: string, createClass: boolean)
 }
 `;
 	}
-	// else
-	// {
-	// cppBuffer =
-	// `#include "` + hppName + `"  `;	
-	// }
 
 	return cppBuffer;
+}
+
+function getterText(typeName: string, variableName: string)
+{
+	// remove the m_ prefix and make first char upper case
+	let variableNameUp = variableName.charAt(2).toUpperCase() + variableName.slice(3); 
+
+	var getterBuffer = '';
+
+	getterBuffer =`
+	` +
+	typeName + " Get" + variableNameUp  + `()
+	{
+		return ` + variableName + `;
+	}
+	`;
+
+	return getterBuffer;
 }
 
 function createFile(name: string, dir: string, type: string, createClass: boolean)
@@ -261,7 +274,24 @@ async function printSelection()
 			return;
 		}
 
-		vscode.window.showInformationMessage(codeText);
+		let generatedText: string = codeText;
+		// gets the current editor and appends the getters/setters 
+		
+		const document = editor.document;          
+		const cursorPos = editor.selection.active;
+
+		// await vscode.commands.executeCommand("cursorMove",
+		// {
+        // 	to:'wrappedLineEnd', by:'line', value:1
+		// }); 
+
+		vscode.commands.executeCommand("actions.find",
+		{
+			text:'private:'
+		});
+
+		//editor.edit(edit => edit.insert(document.lineAt(cursorPos).range.end, generatedText));
+		
 	}
 	else
 	{
@@ -272,49 +302,48 @@ async function printSelection()
 
 function generateGetterSetterAutomatically(text: any, func: string) // func="getter"/"setter"/"both"
 {
-	let selectedTextArray = text.split('\r\n').filter((e: any) => e); //removes empty array values (line breaks)
+	vscode.window.showInformationMessage("text: " + text);
+	//let selectedTextArray = text.split('\r\n').filter((e: any) => e); //removes empty array values (line breaks)
+	
 	let generatedCode = '';
 
-	for (const text of selectedTextArray) 
+	let selectedText, indentSize, variableType, variableName;
+
+	selectedText = text.replace(';', '').trim(); //removes all semicolons 
+	indentSize = text.split(selectedText.charAt(0))[0]; //get the indent size for proper formatting
+		
+	variableType = selectedText.split(' ')[0];
+	variableName = selectedText.split(' ')[1];	
+	
+	if (variableName === null || variableName === undefined) 
 	{
-		let selectedText, indentSize, variableType, variableName;
-
-		selectedText = text.replace(';', '').trim(); //removes all semicolons 
-		indentSize = text.split(selectedText.charAt(0))[0]; //get the indent size for proper formatting
-		 
-		variableType = selectedText.split(' ')[0];
-		variableName = selectedText.split(' ')[1];	
-		
-		if (variableName === null || variableName === undefined) 
-		{
-			vscode.window.showErrorMessage('Faulty Selection. Please make sure you select a variable.');
-			return; 
-		}
-
-		variableName.trim();
-		variableType.trim();
-		
-		let code = '';
-		
-		let variableNameUp = variableName.charAt(0).toUpperCase() + variableName.slice(1);
-		let getter: string = '', setter: string = '';
-
-		if (func === "both") 
-		{
-			code = getter + setter;		
-		} 
-		else if (func === "getter")
-		{
-			getter = "hello world!!!!!!!!!";
-			code = getter;
-		} 
-		else if (func === "setter")
-		{	
-			code = setter;			
-		}
-
-		generatedCode += code; //append the code for each selected line
+		vscode.window.showErrorMessage('Faulty Selection. Please make sure you select a variable.');
+		return; 
 	}
+
+	variableName.trim();
+	variableType.trim();
+	
+	let code = '';
+	
+	
+	let getter: string = '', setter: string = '';
+
+	if (func === "both") 
+	{
+		code = getterText(variableType, variableName);		
+	} 
+	else if (func === "getter")
+	{
+		getter = getterText(variableType, variableName);
+		code = getter;
+	} 
+	else if (func === "setter")
+	{	
+		code = setter;			
+	}
+
+	generatedCode += code; //append the code for each selected line
 
 	return generatedCode;
 }
