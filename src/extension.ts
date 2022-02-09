@@ -249,7 +249,7 @@ async function runCommand(args: any, classCreate: boolean, fileType: string)
 		}		
 }
 
-async function printSelection()
+async function printSelection(this: any)
 {
 	// get the currently open file
 	const editor = vscode.window.activeTextEditor;
@@ -270,28 +270,25 @@ async function printSelection()
 
 		if (!codeText) 
 		{
-			vscode.window.showErrorMessage('generateGetterSetterAutomatically faild!');
+			vscode.window.showErrorMessage('generate Getter Setter Automatically faild!');
 			return;
 		}
-
+		
+		var line  = getPositionForNewFunction();
+		
+		if (!line) 
+		{
+			vscode.window.showErrorMessage('getPositionForNewFunction(); faild!');
+			return;
+		}
+	
 		let generatedText: string = codeText;
-		// gets the current editor and appends the getters/setters 
 		
 		const document = editor.document;          
-		const cursorPos = editor.selection.active;
-
-		// await vscode.commands.executeCommand("cursorMove",
-		// {
-        // 	to:'wrappedLineEnd', by:'line', value:1
-		// }); 
-
-		vscode.commands.executeCommand("actions.find",
-		{
-			text:'private:'
-		});
-
-		//editor.edit(edit => edit.insert(document.lineAt(cursorPos).range.end, generatedText));
+	
+		editor.edit(edit => edit.insert(document.lineAt(line).range.end, generatedText));
 		
+		vscode.window.showInformationMessage(generatedText + " successfully created!");
 	}
 	else
 	{
@@ -300,11 +297,35 @@ async function printSelection()
 	
 }
 
+function getPositionForNewFunction() : number
+{
+	var text: vscode.TextLine;
+	const editor = vscode.window.activeTextEditor;
+	if (!editor) 
+	{
+		return 0;
+	}
+
+	var i: number = 0;
+	text = editor.document.lineAt(i);
+
+	while ("private:" !== text.text && i < 50	)
+	{
+		i++;
+		text = editor.document.lineAt(i);
+		
+	}
+
+	return --i;	 
+}
+
+function sleep(ms: number) 
+{
+    return new Promise(resolve => setTimeout(resolve, ms));
+}
+
 function generateGetterSetterAutomatically(text: any, func: string) // func="getter"/"setter"/"both"
 {
-	vscode.window.showInformationMessage("text: " + text);
-	//let selectedTextArray = text.split('\r\n').filter((e: any) => e); //removes empty array values (line breaks)
-	
 	let generatedCode = '';
 
 	let selectedText, indentSize, variableType, variableName;
