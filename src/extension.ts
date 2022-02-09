@@ -309,11 +309,10 @@ function getPositionForNewFunction() : number
 	var i: number = 0;
 	text = editor.document.lineAt(i);
 
-	while ("private:" !== text.text && i < 50	)
+	while ("private:" !== text.text && i < 50)
 	{
 		i++;
 		text = editor.document.lineAt(i);
-		
 	}
 
 	return --i;	 
