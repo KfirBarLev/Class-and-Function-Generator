@@ -30,9 +30,13 @@ export function activate(context: vscode.ExtensionContext): void {
 												   async (args) => runCommand(args, false, "both")));
 
 	context.subscriptions.push(vscode.commands.registerCommand('class-generator.Getter', 
-												   async (args) => printSelection()));
-												   
-											   
+												   async (args) => printSelection("getter")));
+
+	context.subscriptions.push(vscode.commands.registerCommand('class-generator.Setter', 
+												   async (args) => printSelection("setter")));
+												   											  		
+	context.subscriptions.push(vscode.commands.registerCommand('class-generator.GetterAndSetter', 
+												   async (args) => printSelection("both")));											   	   
 }
 
 async function createNameInput()
@@ -135,6 +139,25 @@ function getterText(typeName: string, variableName: string)
 	`;
 
 	return getterBuffer;
+}
+
+
+function setterText(typeName: string, variableName: string)
+{
+	// remove the m_ prefix and make first char upper case
+	let variableNameUp = variableName.charAt(2).toUpperCase() + variableName.slice(3); 
+
+	var setterBuffer = '';
+
+	setterBuffer =`
+	` +
+	"void" + " Set" + variableNameUp  + `(` + typeName + ` val)
+	{
+		` + variableName + ` = val; 
+	}
+	`;
+
+	return setterBuffer;
 }
 
 function createFile(name: string, dir: string, type: string, createClass: boolean)
@@ -249,7 +272,7 @@ async function runCommand(args: any, classCreate: boolean, fileType: string)
 		}		
 }
 
-async function printSelection(this: any)
+async function printSelection(funcName: string)
 {
 	// get the currently open file
 	const editor = vscode.window.activeTextEditor;
@@ -260,13 +283,13 @@ async function printSelection(this: any)
 	}
 	
 	const hasSelection = editor.selection.active.character;
-	var text: vscode.TextLine;
+	var textLine: vscode.TextLine;
 
 	// check if the user selected something, otherwise display error message
 	if (hasSelection) 
 	{
-		text = editor.document.lineAt(editor.selection.active.line);
-		let codeText = generateGetterSetterAutomatically(text.text, "getter");
+		textLine = editor.document.lineAt(editor.selection.active.line);
+		let codeText = generateGetterSetterAutomatically(textLine.text, funcName);
 
 		if (!codeText) 
 		{
@@ -299,7 +322,7 @@ async function printSelection(this: any)
 
 function getPositionForNewFunction() : number
 {
-	var text: vscode.TextLine;
+	var line: vscode.TextLine;
 	const editor = vscode.window.activeTextEditor;
 	if (!editor) 
 	{
@@ -307,12 +330,12 @@ function getPositionForNewFunction() : number
 	}
 
 	var i: number = 0;
-	text = editor.document.lineAt(i);
+	line = editor.document.lineAt(i);
 
-	while ("private:" !== text.text && i < 50)
+	while (!line.text.includes("private:") && "};" !== line.text )
 	{
 		i++;
-		text = editor.document.lineAt(i);
+		line = editor.document.lineAt(i);
 	}
 
 	return --i;	 
@@ -323,11 +346,12 @@ function sleep(ms: number)
     return new Promise(resolve => setTimeout(resolve, ms));
 }
 
+
 function generateGetterSetterAutomatically(text: any, func: string) // func="getter"/"setter"/"both"
 {
 	let generatedCode = '';
 
-	let selectedText, indentSize, variableType, variableName;
+	let selectedText, indentSize, variableType: string, variableName: string;
 
 	selectedText = text.replace(';', '').trim(); //removes all semicolons 
 	indentSize = text.split(selectedText.charAt(0))[0]; //get the indent size for proper formatting
@@ -351,21 +375,36 @@ function generateGetterSetterAutomatically(text: any, func: string) // func="get
 
 	if (func === "both") 
 	{
-		code = getterText(variableType, variableName);		
+		code = getterText(variableType, variableName) + setterText(variableType, variableName);		
 	} 
 	else if (func === "getter")
 	{
+		var answer = optionBoxs();
+
+		vscode.window.showInformationMessage(answer as unknown as string);
+
 		getter = getterText(variableType, variableName);
 		code = getter;
-	} 
+					
+		
+	}	 
 	else if (func === "setter")
 	{	
-		code = setter;			
+		code = setterText(variableType, variableName);		
 	}
 
 	generatedCode += code; //append the code for each selected line
 
 	return generatedCode;
+}
+
+
+function optionBoxs()
+{
+	
+	var option: vscode.QuickPickOptions = {};
+
+	return vscode.window.showQuickPick(["inline", "header file", "suorce file"], option);
 }
 
 // this method is called when your extension is deactivated
