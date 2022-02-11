@@ -104,7 +104,7 @@ async function generateGetterSetterAutomatically(text: any, func: string) // fun
 
 	if (func === "both") 
 	{
-		code = getterText(variableType, variableName) + setterText(variableType, variableName);		
+		code = getterText(variableType, variableName, "inline") + setterText(variableType, variableName);		
 	} 
 	else if (func === "getter")
 	{
@@ -112,7 +112,7 @@ async function generateGetterSetterAutomatically(text: any, func: string) // fun
 
 		vscode.window.showInformationMessage(answer as unknown as string);
 
-		getter = getterText(variableType, variableName);
+		getter = getterText(variableType, variableName, "inline");
 		code = getter;				
 		
 	}	 
@@ -135,20 +135,29 @@ function optionBoxs()
 }
 
 
-function getterText(typeName: string, variableName: string)
+function getterText(typeName: string, variableName: string, wherePutTheCode: string)
 {
+    //TODO: make functiom that return class name.
 	// remove the m_ prefix and make first char upper case
 	let variableNameUp = variableName.charAt(2).toUpperCase() + variableName.slice(3); 
 
 	var getterBuffer = '';
 
-	getterBuffer =`
-	` +
-	typeName + " Get" + variableNameUp  + `()
-	{
-		return ` + variableName + `;
-	}
-	`;
+    switch(wherePutTheCode)
+    {
+        case "inline":
+    getterBuffer =`
+    ` +
+    typeName + " Get" + variableNameUp  + `()
+    {
+        return ` + variableName + `;
+    }
+    `;
+        case "header file":
+        
+        case "suorce file":
+    }
+	
 
 	return getterBuffer;
 }
