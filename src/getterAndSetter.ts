@@ -138,6 +138,7 @@ function optionBoxs()
 function getterText(typeName: string, variableName: string, wherePutTheCode: string)
 {
     //TODO: make functiom that return class name.
+    
 	// remove the m_ prefix and make first char upper case
 	let variableNameUp = variableName.charAt(2).toUpperCase() + variableName.slice(3); 
 
