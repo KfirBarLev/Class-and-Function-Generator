@@ -39,7 +39,7 @@ export function activate(context: vscode.ExtensionContext): void {
 												   async (args) => printSelection("both")));											   	   
 }
 
-async function createNameInput()
+function createNameInput()
 {
 	var option: vscode.InputBoxOptions = 
 	{
@@ -259,7 +259,7 @@ async function runCommand(args: any, classCreate: boolean, fileType: string)
 			dir = vscode.workspace.rootPath as string; // use workspace path
 		}
 
-		var out = createClass(res as string, dir as string, classCreate, fileType); 
+		var out = createClass(res as unknown as string, dir as string, classCreate, fileType); 
 
 		// Display a message box to the user
 		if (out)
@@ -289,7 +289,7 @@ async function printSelection(funcName: string)
 	if (hasSelection) 
 	{
 		textLine = editor.document.lineAt(editor.selection.active.line);
-		let codeText = generateGetterSetterAutomatically(textLine.text, funcName);
+		let codeText = await generateGetterSetterAutomatically(textLine.text, funcName);
 
 		if (!codeText) 
 		{
@@ -305,11 +305,11 @@ async function printSelection(funcName: string)
 			return;
 		}
 	
-		let generatedText: string = codeText;
+		let generatedText = codeText;
 		
 		const document = editor.document;          
 	
-		editor.edit(edit => edit.insert(document.lineAt(line).range.end, generatedText));
+		editor.edit(edit => edit.insert(document.lineAt(line).range.end, generatedText as unknown as string));
 		
 		vscode.window.showInformationMessage(generatedText + " successfully created!");
 	}
@@ -347,7 +347,7 @@ function sleep(ms: number)
 }
 
 
-function generateGetterSetterAutomatically(text: any, func: string) // func="getter"/"setter"/"both"
+async function generateGetterSetterAutomatically(text: any, func: string) // func="getter"/"setter"/"both"
 {
 	let generatedCode = '';
 
@@ -379,13 +379,12 @@ function generateGetterSetterAutomatically(text: any, func: string) // func="get
 	} 
 	else if (func === "getter")
 	{
-		var answer = optionBoxs();
+		var answer = await optionBoxs();
 
 		vscode.window.showInformationMessage(answer as unknown as string);
 
 		getter = getterText(variableType, variableName);
-		code = getter;
-					
+		code = getter;				
 		
 	}	 
 	else if (func === "setter")
@@ -401,7 +400,6 @@ function generateGetterSetterAutomatically(text: any, func: string) // func="get
 
 function optionBoxs()
 {
-	
 	var option: vscode.QuickPickOptions = {};
 
 	return vscode.window.showQuickPick(["inline", "header file", "suorce file"], option);
