@@ -1,5 +1,5 @@
 import * as vscode from 'vscode';
-
+import * as fs from 'fs';
 
 export async function generateGetterSetter(funcName: string)
 {
@@ -18,13 +18,23 @@ export async function generateGetterSetter(funcName: string)
 	if (hasSelection) 
 	{
 		textLine = editor.document.lineAt(editor.selection.active.line);
-		let codeText = await generateGetterSetterAutomatically(textLine.text, funcName);
+		var answer = await optionBoxs(); // for where to put the code (inline/soure/header)
+		if (!answer)
+		{
+			return;
+		}
+
+		var wherePutTheCode: string = answer;
+		var isInline: boolean = (wherePutTheCode === "inline");
+
+		let codeText = generateGetterSetterAutomatically(textLine.text, funcName, isInline);
 
 		if (!codeText) 
 		{
 			vscode.window.showErrorMessage('generate Getter Setter Automatically faild!');
 			return;
 		}
+		
 		
 		var line  = getPositionForNewFunction();
 		
@@ -36,11 +46,41 @@ export async function generateGetterSetter(funcName: string)
 	
 		let generatedText = codeText;
 		
-		const document = editor.document;          
-	
-		editor.edit(edit => edit.insert(document.lineAt(line).range.end, generatedText as unknown as string));
+		const document = editor.document;
+
+
+		vscode.window.showInformationMessage(wherePutTheCode);
 		
-		vscode.window.showInformationMessage(generatedText + " successfully created!");
+		switch (wherePutTheCode)
+		{
+			case "inline":
+				editor.edit(edit => edit.insert(document.lineAt(line).range.end, generatedText[0]));
+				break;
+			case "suorce file":
+				// write implemention in source file
+				var sourceName = document.fileName.replace("hpp", "cpp");
+
+				fs.appendFile(sourceName, generatedText[0], function (err)
+				{
+					if (err) 
+					{
+						console.error(err);
+						return false;
+					}
+				});
+				// put defenition on header
+				editor.edit(edit => edit.insert(document.lineAt(line).range.end, generatedText[1]));
+				break;
+			case "header file":
+
+				break;
+				
+		}
+		
+		
+		
+		
+		vscode.window.showInformationMessage(funcName + " successfully created!");
 	}
 	else
 	{
@@ -70,20 +110,40 @@ function getPositionForNewFunction() : number
 	return --i;	 
 }
 
+function getClassName() : string
+{
+	var line: vscode.TextLine;
+	const editor = vscode.window.activeTextEditor;
+	if (!editor) 
+	{
+		return '';
+	}
+
+	var i: number = 0;
+	line = editor.document.lineAt(i);
+	
+	while (!line.text.includes("class") && "};" !== line.text )
+	{
+		i++;
+		line = editor.document.lineAt(i);
+	}
+
+	let className = line.text.split(' ');
+
+	return className[1];	 
+}
+
 // function sleep(ms: number) 
 // {
 //     return new Promise(resolve => setTimeout(resolve, ms));
 // }
 
 
-async function generateGetterSetterAutomatically(text: any, func: string) // func="getter"/"setter"/"both"
+function generateGetterSetterAutomatically(text: any, func: string, isInline: boolean) // func="getter"/"setter"/"both"
 {
-	let generatedCode = '';
-
-	let selectedText, indentSize, variableType: string, variableName: string;
+	let selectedText, variableType: string, variableName: string;
 
 	selectedText = text.replace(';', '').trim(); //removes all semicolons 
-	indentSize = text.split(selectedText.charAt(0))[0]; //get the indent size for proper formatting
 		
 	variableType = selectedText.split(' ')[0];
 	variableName = selectedText.split(' ')[1];	
@@ -97,33 +157,29 @@ async function generateGetterSetterAutomatically(text: any, func: string) // fun
 	variableName.trim();
 	variableType.trim();
 	
-	let code = '';
-	
-	
-	let getter: string = '', setter: string = '';
+	let code: string[] = [];
 
 	if (func === "both") 
 	{
-		code = getterText(variableType, variableName, "inline") + setterText(variableType, variableName);		
+		let tmpGet: string[] = [];
+		let tmpSet: string[] = [];
+
+		tmpGet = getterText(variableType, variableName, isInline);
+		tmpSet = setterText(variableType, variableName, isInline);
+
+		code[0] = tmpGet[0] + tmpSet[0];
+		code[1] = tmpGet[1] + tmpSet[1];		
 	} 
 	else if (func === "getter")
 	{
-		var answer = await optionBoxs();
-
-		vscode.window.showInformationMessage(answer as unknown as string);
-
-		getter = getterText(variableType, variableName, "inline");
-		code = getter;				
-		
+		code = getterText(variableType, variableName, isInline);					
 	}	 
 	else if (func === "setter")
 	{	
-		code = setterText(variableType, variableName);		
+		code = setterText(variableType, variableName, isInline);		
 	}
 
-	generatedCode += code; //append the code for each selected line
-
-	return generatedCode;
+	return code;
 }
 
 
@@ -131,53 +187,86 @@ function optionBoxs()
 {
 	var option: vscode.QuickPickOptions = {};
 
-	return vscode.window.showQuickPick(["inline", "header file", "suorce file"], option);
+	return vscode.window.showQuickPick(["inline", "suorce file", "header file"], option);
 }
 
 
-function getterText(typeName: string, variableName: string, wherePutTheCode: string)
+function getterText(typeName: string, variableName: string, isInline: boolean)
 {
-    //TODO: make functiom that return class name.
-    
+    var clasName: string = '';
+	var defenitionText = '';
+	var implementationText = '';
 	// remove the m_ prefix and make first char upper case
 	let variableNameUp = variableName.charAt(2).toUpperCase() + variableName.slice(3); 
 
-	var getterBuffer = '';
-
-    switch(wherePutTheCode)
-    {
-        case "inline":
-    getterBuffer =`
-    ` +
-    typeName + " Get" + variableNameUp  + `()
-    {
-        return ` + variableName + `;
-    }
-    `;
-        case "header file":
-        
-        case "suorce file":
-    }
+	if(!isInline)
+	{
+	clasName =  getClassName();
+	clasName += "::";
 	
+	defenitionText =`
+	` +
+	typeName + " Get" + variableNameUp  + `();
+	`; 
 
-	return getterBuffer;
+implementationText =`
+` +
+typeName + " " + clasName + "Get" + variableNameUp  + `()
+{
+	return ` + variableName + `;
+}
+`;
+	}
+	else
+	{
+	implementationText =`
+	` +
+	typeName + " " + clasName + "Get" + variableNameUp  + `()
+	{
+		return ` + variableName + `;
+	}
+	`;
+	}   
+     
+	let textArray: string[] = [];
+	textArray[0] = implementationText;
+	textArray[1] = defenitionText;
+
+	return textArray;
 }
 
 
-function setterText(typeName: string, variableName: string)
+function setterText(typeName: string, variableName: string, isInline: boolean)
 {
 	// remove the m_ prefix and make first char upper case
 	let variableNameUp = variableName.charAt(2).toUpperCase() + variableName.slice(3); 
+	var clasName: string = '';
+	var defenitionText = '';
 
-	var setterBuffer = '';
+	if(!isInline)
+	{
+		clasName =  getClassName();
+		clasName += "::";
+		
+		defenitionText =`
+		` +
+		"void" + " " + clasName + "Set" + variableNameUp  + `(` + typeName + ` val);
+		`; 
+	}
 
-	setterBuffer =`
+	var implementationText = '';
+
+	implementationText =`
 	` +
-	"void" + " Set" + variableNameUp  + `(` + typeName + ` val)
+	"void" + " " + clasName + "Set" + variableNameUp  + `(` + typeName + ` val)
 	{
 		` + variableName + ` = val; 
 	}
 	`;
 
-	return setterBuffer;
+	let textArray: string[] = [];
+	textArray[0] = implementationText;
+	textArray[1] = defenitionText;
+
+	return textArray;
 }
