@@ -28,7 +28,6 @@ export async function generateGetterSetter(funcName: string)
 		var isInline: boolean = (wherePutTheCode === "inline");
 
 		let codeText = generateGetterSetterAutomatically(textLine.text, funcName, isInline);
-
 		if (!codeText) 
 		{
 			vscode.window.showErrorMessage('generate Getter Setter Automatically faild!');
@@ -37,7 +36,6 @@ export async function generateGetterSetter(funcName: string)
 		
 		
 		var line  = getPositionForNewFunction();
-		
 		if (!line) 
 		{
 			vscode.window.showErrorMessage('getPositionForNewFunction(); faild!');
@@ -45,11 +43,7 @@ export async function generateGetterSetter(funcName: string)
 		}
 	
 		let generatedText = codeText;
-		
 		const document = editor.document;
-
-
-		vscode.window.showInformationMessage(wherePutTheCode);
 		
 		switch (wherePutTheCode)
 		{
@@ -68,19 +62,20 @@ export async function generateGetterSetter(funcName: string)
 						return false;
 					}
 				});
-				// put defenition on header
+				// put defenition on header 
+				
 				editor.edit(edit => edit.insert(document.lineAt(line).range.end, generatedText[1]));
-				break;
-			case "header file":
 
 				break;
-				
+			case "header file":
+				// put defenition on header
+				await editor.edit(edit => edit.insert(document.lineAt(line).range.end, generatedText[1]));
+				var endLine: number = getPositionForNewFunction(true);
+				await editor.edit(edit => edit.insert(document.lineAt(endLine).range.end, generatedText[0]));
+				break;	
 		}
 		
-		
-		
-		
-		vscode.window.showInformationMessage(funcName + " successfully created!");
+		vscode.window.showInformationMessage(funcName + " successfully created! " + wherePutTheCode);
 	}
 	else
 	{
@@ -89,7 +84,7 @@ export async function generateGetterSetter(funcName: string)
 	
 }
 
-function getPositionForNewFunction() : number
+function getPositionForNewFunction(impInHeader: boolean = false) : number
 {
 	var line: vscode.TextLine;
 	const editor = vscode.window.activeTextEditor;
@@ -101,11 +96,22 @@ function getPositionForNewFunction() : number
 	var i: number = 0;
 	line = editor.document.lineAt(i);
 
-	while (!line.text.includes("private:") && "};" !== line.text )
+	if (impInHeader)
 	{
-		i++;
-		line = editor.document.lineAt(i);
+		while (!line.text.includes("endif"))
+		{
+			i++;
+			line = editor.document.lineAt(i);
+		}
 	}
+	else
+	{
+		while (!line.text.includes("private:") && "};" !== line.text )
+		{
+			i++;
+			line = editor.document.lineAt(i);
+		}
+	}	
 
 	return --i;	 
 }
@@ -122,6 +128,7 @@ function getClassName() : string
 	var i: number = 0;
 	line = editor.document.lineAt(i);
 	
+	// TODO: start the sereach for current line(where the membere), and go up until find class
 	while (!line.text.includes("class") && "};" !== line.text )
 	{
 		i++;
@@ -132,12 +139,6 @@ function getClassName() : string
 
 	return className[1];	 
 }
-
-// function sleep(ms: number) 
-// {
-//     return new Promise(resolve => setTimeout(resolve, ms));
-// }
-
 
 function generateGetterSetterAutomatically(text: any, func: string, isInline: boolean) // func="getter"/"setter"/"both"
 {
@@ -242,27 +243,35 @@ function setterText(typeName: string, variableName: string, isInline: boolean)
 	let variableNameUp = variableName.charAt(2).toUpperCase() + variableName.slice(3); 
 	var clasName: string = '';
 	var defenitionText = '';
+	var implementationText = '';
 
 	if(!isInline)
 	{
 		clasName =  getClassName();
 		clasName += "::";
 		
-		defenitionText =`
-		` +
-		"void" + " " + clasName + "Set" + variableNameUp  + `(` + typeName + ` val);
-		`; 
+	defenitionText =`
+	` +
+	"void" + " Set" + variableNameUp  + `(` + typeName + ` val);
+	`; 
+implementationText =`
+` +
+"void" + " " + clasName + "Set" + variableNameUp  + `(` + typeName + ` val)
+{
+	` + variableName + ` = val; 
+}
+`;
 	}
-
-	var implementationText = '';
-
+	else
+	{
 	implementationText =`
 	` +
-	"void" + " " + clasName + "Set" + variableNameUp  + `(` + typeName + ` val)
+	"void" + " Set" + variableNameUp  + `(` + typeName + ` val)
 	{
 		` + variableName + ` = val; 
 	}
 	`;
+	}
 
 	let textArray: string[] = [];
 	textArray[0] = implementationText;
