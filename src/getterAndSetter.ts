@@ -3,6 +3,7 @@ import * as fs from 'fs';
 
 export async function generateGetterSetter(funcName: string)
 {
+	//optionsDialog();
 	// get the currently open file
 	const editor = vscode.window.activeTextEditor;
 	
@@ -24,7 +25,7 @@ export async function generateGetterSetter(funcName: string)
 			return;
 		}
 
-		var wherePutTheCode: string = answer;
+		var wherePutTheCode: string = answer.label;
 		var isInline: boolean = (wherePutTheCode === "inline");
 
 		let codeText = generateGetterSetterAutomatically(textLine.text, funcName, isInline);
@@ -53,7 +54,6 @@ export async function generateGetterSetter(funcName: string)
 			case "suorce file":
 				// write implemention in source file
 				var sourceName = document.fileName.replace("hpp", "cpp");
-
 				fs.appendFile(sourceName, generatedText[0], function (err)
 				{
 					if (err) 
@@ -63,9 +63,7 @@ export async function generateGetterSetter(funcName: string)
 					}
 				});
 				// put defenition on header 
-				
 				editor.edit(edit => edit.insert(document.lineAt(line).range.end, generatedText[1]));
-
 				break;
 			case "header file":
 				// put defenition on header
@@ -186,11 +184,26 @@ function generateGetterSetterAutomatically(text: any, func: string, isInline: bo
 
 function optionBoxs()
 {
-	var option: vscode.QuickPickOptions = {};
+	var option: vscode.QuickPickOptions = 
+	{
+        title: "choose where to put the implementaion",        	
+		canPickMany: true	
+	};
 
-	return vscode.window.showQuickPick(["inline", "suorce file", "header file"], option);
+	return vscode.window.showQuickPick(
+		[
+			{ label: "inline", description: "implemntaion in header class"}, 
+			{label: "suorce file", description: "decleration in header, implemntaion in source"}, 
+			{label: "header file", description: "decleration and implemntaion in header"}
+		], option);
 }
 
+// function optionsDialog()
+// {
+// 	var items: vscode.MessageOptions
+	
+// 	vscode.window.showOpenDialog();
+// }
 
 function getterText(typeName: string, variableName: string, isInline: boolean)
 {
