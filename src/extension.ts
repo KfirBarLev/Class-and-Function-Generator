@@ -3,6 +3,7 @@
 import * as vscode from 'vscode';
 import * as file from './classAndFileCreation';
 import * as getSet from './getterAndSetter';
+import * as equal from './equalityOperator';
 
 // this method is called when your extension is activated
 // your extension is activated the very first time the command is executed
@@ -34,7 +35,10 @@ export function activate(context: vscode.ExtensionContext): void
 											async (args) => getSet.generateGetterSetter("setter")));
 												   											  		
 	context.subscriptions.push(vscode.commands.registerCommand('class-generator.GetterAndSetter', 
-											async (args) => getSet.generateGetterSetter("both")));											   	   
+											async (args) => getSet.generateGetterSetter("both")));
+											
+	context.subscriptions.push(vscode.commands.registerCommand('class-generator.EqualityOperator', 
+											async (args) => equal.generateEqualityOperator()));
 }
 
 // this method is called when your extension is deactivated

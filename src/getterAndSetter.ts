@@ -186,8 +186,8 @@ function optionBoxs()
 {
 	var option: vscode.QuickPickOptions = 
 	{
-        title: "choose where to put the implementaion",        	
-		canPickMany: true	
+        title: "choose where to put the implementaion"        	
+		//canPickMany: true	
 	};
 
 	return vscode.window.showQuickPick(
@@ -198,12 +198,6 @@ function optionBoxs()
 		], option);
 }
 
-// function optionsDialog()
-// {
-// 	var items: vscode.MessageOptions
-	
-// 	vscode.window.showOpenDialog();
-// }
 
 function getterText(typeName: string, variableName: string, isInline: boolean)
 {
