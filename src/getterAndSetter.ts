@@ -3,7 +3,6 @@ import * as fs from 'fs';
 
 export async function generateGetterSetter(funcName: string)
 {
-	//optionsDialog();
 	// get the currently open file
 	const editor = vscode.window.activeTextEditor;
 	
@@ -116,24 +115,23 @@ function getPositionForNewFunction(impInHeader: boolean = false) : number
 
 function getClassName() : string
 {
-	var line: vscode.TextLine;
+	var lineText: vscode.TextLine;
 	const editor = vscode.window.activeTextEditor;
 	if (!editor) 
 	{
 		return '';
 	}
 
-	var i: number = 0;
-	line = editor.document.lineAt(i);
+	var i: number = editor.selection.active.line;
+	lineText = editor.document.lineAt(i);
 	
-	// TODO: start the sereach for current line(where the membere), and go up until find class
-	while (!line.text.includes("class") && "};" !== line.text )
+	while (!lineText.text.includes("class") && 0 !== i)
 	{
-		i++;
-		line = editor.document.lineAt(i);
+		i--;
+		lineText = editor.document.lineAt(i);
 	}
 
-	let className = line.text.split(' ');
+	let className = lineText.text.split(' ');
 
 	return className[1];	 
 }
