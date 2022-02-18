@@ -1,5 +1,6 @@
 import * as vscode from 'vscode';
 import * as fs from 'fs';
+import * as utils from './utils';
 
 export async function generateGetterSetter(funcName: string)
 {
@@ -35,7 +36,7 @@ export async function generateGetterSetter(funcName: string)
 		}
 		
 		
-		var line  = getPositionForNewFunction();
+		var line  = utils.getPositionForNewFunction();
 		if (!line) 
 		{
 			vscode.window.showErrorMessage('getPositionForNewFunction(); faild!');
@@ -67,7 +68,7 @@ export async function generateGetterSetter(funcName: string)
 			case "header file":
 				// put defenition on header
 				await editor.edit(edit => edit.insert(document.lineAt(line).range.end, generatedText[1]));
-				var endLine: number = getPositionForNewFunction(true);
+				var endLine: number = utils.getPositionForNewFunction(true);
 				await editor.edit(edit => edit.insert(document.lineAt(endLine).range.end, generatedText[0]));
 				break;	
 		}
@@ -79,61 +80,6 @@ export async function generateGetterSetter(funcName: string)
 		vscode.window.showErrorMessage('Nothing was selected!');
 	}
 	
-}
-
-function getPositionForNewFunction(impInHeader: boolean = false) : number
-{
-	var line: vscode.TextLine;
-	const editor = vscode.window.activeTextEditor;
-	if (!editor) 
-	{
-		return 0;
-	}
-
-	var i: number = 0;
-	line = editor.document.lineAt(i);
-
-	if (impInHeader)
-	{
-		while (!line.text.includes("endif"))
-		{
-			i++;
-			line = editor.document.lineAt(i);
-		}
-	}
-	else
-	{
-		while (!line.text.includes("private:") && "};" !== line.text )
-		{
-			i++;
-			line = editor.document.lineAt(i);
-		}
-	}	
-
-	return --i;	 
-}
-
-function getClassName() : string
-{
-	var lineText: vscode.TextLine;
-	const editor = vscode.window.activeTextEditor;
-	if (!editor) 
-	{
-		return '';
-	}
-
-	var i: number = editor.selection.active.line;
-	lineText = editor.document.lineAt(i);
-	
-	while (!lineText.text.includes("class") && 0 !== i)
-	{
-		i--;
-		lineText = editor.document.lineAt(i);
-	}
-
-	let className = lineText.text.split(' ');
-
-	return className[1];	 
 }
 
 function generateGetterSetterAutomatically(text: any, func: string, isInline: boolean) // func="getter"/"setter"/"both"
@@ -207,7 +153,7 @@ function getterText(typeName: string, variableName: string, isInline: boolean)
 
 	if(!isInline)
 	{
-	clasName =  getClassName();
+	clasName =  utils.getClassName();
 	clasName += "::";
 	
 	defenitionText =`
@@ -252,7 +198,7 @@ function setterText(typeName: string, variableName: string, isInline: boolean)
 
 	if(!isInline)
 	{
-		clasName =  getClassName();
+		clasName =  utils.getClassName();
 		clasName += "::";
 		
 	defenitionText =`

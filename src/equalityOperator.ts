@@ -1,4 +1,5 @@
 import * as vscode from 'vscode';
+import * as utils from './utils';
 
 export async function generateEqualityOperator()
 {
@@ -10,7 +11,7 @@ export async function generateEqualityOperator()
 
     var wherePutTheCode: string = answer.label;
 	var names: string = equalityOperatorText(true);
-	var line  = getPositionForNewFunction();
+	var line  = utils.getPositionForNewFunction();
 	if (!line) 
 	{
 		vscode.window.showErrorMessage('getPositionForNewFunction(); faild!');
@@ -130,13 +131,13 @@ function equalityOperatorText(isInline: boolean)
 
 	implementationText =`
 	` +
-	"bool operator==(const " + getClassName() + "&other) const" + `
+	"bool operator==(const " + utils.getClassName() + "&other) const" + `
 	{
 	` + equalityMembersText() + `
 	}
 
 	`
-	+ `bool operator!=(const ` + getClassName() +` &other) const { return !(*this == other); }
+	+ `bool operator!=(const ` + utils.getClassName() +` &other) const { return !(*this == other); }
 	`
 	;
 	}   
@@ -174,59 +175,3 @@ function equalityMembersText()
 
 	return text;
 }
-
-function getClassName() : string
-{
-	var lineText: vscode.TextLine;
-	const editor = vscode.window.activeTextEditor;
-	if (!editor) 
-	{
-		return '';
-	}
-
-	var i: number = editor.selection.active.line;
-	lineText = editor.document.lineAt(i);
-	
-	while (!lineText.text.includes("class") && 0 !== i)
-	{
-		i--;
-		lineText = editor.document.lineAt(i);
-	}
-
-	let className = lineText.text.split(' ');
-
-	return className[1];	 
-}
-
-function getPositionForNewFunction(impInHeader: boolean = false) : number
-{
-	var line: vscode.TextLine;
-	const editor = vscode.window.activeTextEditor;
-	if (!editor) 
-	{
-		return 0;
-	}
-
-	var i: number = 0;
-	line = editor.document.lineAt(i);
-
-	if (impInHeader)
-	{
-		while (!line.text.includes("endif"))
-		{
-			i++;
-			line = editor.document.lineAt(i);
-		}
-	}
-	else
-	{
-		while (!line.text.includes("private:") && "};" !== line.text )
-		{
-			i++;
-			line = editor.document.lineAt(i);
-		}
-	}	
-
-	return --i;	 
-}
-
