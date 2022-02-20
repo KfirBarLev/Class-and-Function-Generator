@@ -56,4 +56,20 @@ export function getClassName() : string
 	return className[1];	 
 }
 
+export function optionBoxsForWherePutTheCode()
+{
+	var option: vscode.QuickPickOptions = 
+	{
+        title: "choose where to put the implementaion"        	
+		//canPickMany: true	
+	};
+
+	return vscode.window.showQuickPick(
+		[
+			{label: "inline", description: "implemntaion in header class"}, 
+			{label: "suorce file", description: "decleration in header, implemntaion in source"}, 
+			{label: "header file", description: "decleration and implemntaion in header"}
+		], option);
+}
+
 

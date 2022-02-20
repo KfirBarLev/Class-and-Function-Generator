@@ -3,14 +3,20 @@ import * as utils from './utils';
 
 export async function generateEqualityOperator()
 {
-    var answer = await optionBoxs(); // for where to put the code (inline/soure/header)
-    if (!answer)
+	var classMembers = await optionBoxForClassMembers();
+	if (!classMembers)
     {
         return;
     }
-
-    var wherePutTheCode: string = answer.label;
-	var names: string = equalityOperatorText(true);
+	
+    var putCodeAt = await utils.optionBoxsForWherePutTheCode();
+    if (!putCodeAt)
+    {
+        return;
+    }
+	
+    var wherePutTheCode: string = putCodeAt.label;
+	var names: string = equalityOperatorText("inline" === putCodeAt.label);
 	var line  = utils.getPositionForNewFunction();
 	if (!line) 
 	{
@@ -28,23 +34,8 @@ export async function generateEqualityOperator()
 	editor.edit(edit => edit.insert(document.lineAt(line).range.end, names));
 }
 
-function optionBoxs()
-{
-	var option: vscode.QuickPickOptions = 
-	{
-        title: "choose where to put the implementaion"        	
-		//canPickMany: true	
-	};
 
-	return vscode.window.showQuickPick(
-		[
-			{label: "inline", description: "implemntaion in header class"}, 
-			{label: "suorce file", description: "decleration in header, implemntaion in source"}, 
-			{label: "header file", description: "decleration and implemntaion in header"}
-		], option);
-}
-
-function getAllClassMembers()
+function getAllClassMembersWithType()
 {
 	var lineText: vscode.TextLine;
 	const editor = vscode.window.activeTextEditor;
@@ -62,15 +53,16 @@ function getAllClassMembers()
 	{
 		if (lineText.text.includes("m_") || lineText.text.includes("s_"))
 		{
-			let selectedText,/* variableType: string,*/ variableName: string;
+			let selectedText: string/* variableType: string, variableName: string*/;
 
 			selectedText = lineText.text.replace(';', '').trim(); //removes all semicolons 
 				
 			//variableType = selectedText.split(' ')[0];
-			variableName = selectedText.split(' ')[1];	
+			//variableName = selectedText.split(' ')[1];	
 
-			classMembersName.push(variableName.trim());
+			//classMembersName.push(variableName.trim());
 			//variableType.trim();
+			classMembersName.push(selectedText.trim());
 		}
 
 		lineNumber++;
@@ -154,17 +146,18 @@ function equalityOperatorText(isInline: boolean)
 
 function equalityMembersText()
 {
-	var membersNames: string[] = getAllClassMembers();
+	var membersNames: string[] = getAllClassMembersWithType();
 	var text: string = '';
 	for (var member of membersNames)
 	{
+		var variableName: string = member.split(' ')[1].trim();
 		if (member === membersNames[0])
 		{
-			text += "	return " + member + " == " + "other." + member;
+			text += "	return " + variableName + " == " + "other." + variableName;
 		}
 		else
 		{
-			text += "\n			&& " + member + " == " + "other." + member;
+			text += "\n			&& " + variableName + " == " + "other." + variableName;
 		}
 
 		if (member === membersNames[membersNames.length - 1])
@@ -174,4 +167,39 @@ function equalityMembersText()
 	}
 
 	return text;
+}
+
+function optionBoxForClassMembers()
+{
+	let items: vscode.QuickPickItem[] = [];
+	var members: string[] = getAllClassMembersWithType();
+	var button: vscode.QuickInputButton[] = [];
+	for (let index = 0; index < members.length; index++) 
+	{
+		var variableType: string = members[index].split(' ')[0].trim();
+		var variableName: string = members[index].split(' ')[1].trim();	
+
+		items.push({ label: variableName, description: variableType,
+			 picked: true, alwaysShow: true, buttons: button });
+		
+	}	
+
+	var option: vscode.QuickPickOptions = 
+	{
+        title: "choose which class members include in the equality operators",        	
+		canPickMany: true	
+	};
+
+	return vscode.window.showQuickPick(items, option).then(selection => 
+	{
+		// the user canceled the selection
+		if (!selection) 
+		{
+			return;
+		}
+		else
+		{
+			return selection;
+		}
+	});
 }

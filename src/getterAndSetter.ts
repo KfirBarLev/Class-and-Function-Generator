@@ -19,7 +19,7 @@ export async function generateGetterSetter(funcName: string)
 	if (hasSelection) 
 	{
 		textLine = editor.document.lineAt(editor.selection.active.line);
-		var answer = await optionBoxs(); // for where to put the code (inline/soure/header)
+		var answer = await utils.optionBoxsForWherePutTheCode();
 		if (!answer)
 		{
 			return;
@@ -123,23 +123,6 @@ function generateGetterSetterAutomatically(text: any, func: string, isInline: bo
 	}
 
 	return code;
-}
-
-
-function optionBoxs()
-{
-	var option: vscode.QuickPickOptions = 
-	{
-        title: "choose where to put the implementaion"        	
-		//canPickMany: true	
-	};
-
-	return vscode.window.showQuickPick(
-		[
-			{ label: "inline", description: "implemntaion in header class"}, 
-			{label: "suorce file", description: "decleration in header, implemntaion in source"}, 
-			{label: "header file", description: "decleration and implemntaion in header"}
-		], option);
 }
 
 
