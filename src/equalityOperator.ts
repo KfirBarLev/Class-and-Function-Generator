@@ -1,5 +1,6 @@
 import * as vscode from 'vscode';
 import * as utils from './utils';
+import * as fs from 'fs';
 
 export async function generateEqualityOperator()
 {
@@ -9,8 +10,7 @@ export async function generateEqualityOperator()
         return;
     }
 	
-    var wherePutTheCode: string = putCodeAt.label;
-	var names: string = await equalityOperatorText("inline" === putCodeAt.label);
+	var text: string[] = await equalityOperatorText("inline" === putCodeAt.label);
 	var line  = utils.getPositionForNewFunction();
 	if (!line) 
 	{
@@ -25,7 +25,32 @@ export async function generateEqualityOperator()
 	
 	const document = editor.document;
 	
-	editor.edit(edit => edit.insert(document.lineAt(line).range.end, names));
+	switch (putCodeAt.label)
+		{
+			case "inline":
+				editor.edit(edit => edit.insert(document.lineAt(line).range.end, text[0]));
+				break;
+			case "suorce file":
+				// write implemention in source file
+				var sourceName = document.fileName.replace("hpp", "cpp");
+				fs.appendFile(sourceName, text[0], function (err)
+				{
+					if (err) 
+					{
+						console.error(err);
+						return false;
+					}
+				});
+				// put defenition on header 
+				editor.edit(edit => edit.insert(document.lineAt(line).range.end, text[1]));
+				break;
+			case "header file":
+				// put defenition on header
+				await editor.edit(edit => edit.insert(document.lineAt(line).range.end, text[1]));
+				var endLine: number = utils.getPositionForNewFunction(true);
+				await editor.edit(edit => edit.insert(document.lineAt(endLine).range.end, text[0]));
+				break;	
+		}
 }
 
 
@@ -51,11 +76,6 @@ function getAllClassMembersWithType()
 
 			selectedText = lineText.text.replace(';', '').trim(); //removes all semicolons 
 				
-			//variableType = selectedText.split(' ')[0];
-			//variableName = selectedText.split(' ')[1];	
-
-			//classMembersName.push(variableName.trim());
-			//variableType.trim();
 			classMembersName.push(selectedText.trim());
 		}
 
@@ -88,29 +108,36 @@ function getTheLineWhereTheClassStart()
 }
 
 async function equalityOperatorText(isInline: boolean)
-{
-	
+{	
     var clasName: string = '';
 	var defenitionText = '';
 	var implementationText = '';
 
 	if(!isInline)
 	{
-// 	clasName =  getClassName();
-// 	clasName += "::";
+	clasName =  utils.getClassName();
 	
-// 	defenitionText =`
-// 	` +
-// 	typeName + " Get" + variableNameUp  + `();
-// 	`; 
+	
+	defenitionText =`
+	` +
+	"bool operator==(const " + clasName + " &other) const;\n" + 
+	"    bool operator!=(const " + clasName + " &other) const;\n"
+	; 
 
-// implementationText =`
-// ` +
-// typeName + " " + clasName + "Get" + variableNameUp  + `()
-// {
-// 	return ` + variableName + `;
-// }
-// `;
+implementationText =`
+` +
+"bool " + clasName + "::operator==(const " + clasName + " &other) const" + `
+{
+` + await equalityMembersText() + `
+}
+
+`
++ `bool ` + clasName + "::" + `operator!=(const ` + clasName +` &other) const  
+{ 
+	return !(*this == other); 
+}
+`
+;
 	}
 	else
 	{
@@ -119,7 +146,7 @@ async function equalityOperatorText(isInline: boolean)
 	` +
 	"bool operator==(const " + utils.getClassName() + "&other) const" + `
 	{
-	` + await equalityMembersText() + `
+	` + await equalityMembersText(true) + `
 	}
 
 	`
@@ -128,18 +155,22 @@ async function equalityOperatorText(isInline: boolean)
 	;
 	}   
      
-	// let textArray: string[] = [];
-	// textArray[0] = implementationText;
-	// textArray[1] = defenitionText;
+	let textArray: string[] = [];
+	textArray[0] = implementationText;
+	textArray[1] = defenitionText;
 
-	//return textArray;
-	return implementationText;
-
+	return textArray;
 }
 
 
-async function equalityMembersText()
+async function equalityMembersText(isInline: boolean = false)
 {
+	var tab: string = "";
+	if (isInline)
+	{
+		tab = "    ";
+	}
+	
 	var membersNames = await optionBoxForClassMembers();
 
 	if (!membersNames)
@@ -152,11 +183,11 @@ async function equalityMembersText()
 	{
 		if (member === membersNames[0])
 		{
-			text += "	return " + member + " == " + "other." + member;
+			text += "    return " + member + " == " + "other." + member;
 		}
 		else
 		{
-			text += "\n			&& " + member + " == " + "other." + member;
+			text += "\n" + tab + "		&& " + member + " == " + "other." + member;
 		}
 
 		if (member === membersNames[membersNames.length - 1])
