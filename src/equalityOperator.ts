@@ -183,7 +183,13 @@ async function optionBoxForClassMembers()
 	for (let index = 0; index < members.length; index++) 
 	{
 		var variableType: string = members[index].split(' ')[0].trim();
-		var variableName: string = members[index].split(' ')[1].trim();	
+		var variableName: string = members[index].split(' ')[1].trim();
+		
+		if (variableName[0] === '*' || variableName[0] === '&')
+		{
+			variableType += variableName[0];
+			variableName = variableName.replace(variableName[0], "").trim();
+		}
 
 		items.push({ label: variableName, description: variableType,picked: true});	
 	}	
