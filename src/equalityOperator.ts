@@ -3,12 +3,6 @@ import * as utils from './utils';
 
 export async function generateEqualityOperator()
 {
-	var classMembers = await optionBoxForClassMembers();
-	if (!classMembers)
-    {
-        return;
-    }	
-	
     var putCodeAt = await utils.optionBoxsForWherePutTheCode();
     if (!putCodeAt)
     {
@@ -16,7 +10,7 @@ export async function generateEqualityOperator()
     }
 	
     var wherePutTheCode: string = putCodeAt.label;
-	var names: string = equalityOperatorText("inline" === putCodeAt.label);
+	var names: string = await equalityOperatorText("inline" === putCodeAt.label);
 	var line  = utils.getPositionForNewFunction();
 	if (!line) 
 	{
@@ -93,7 +87,7 @@ function getTheLineWhereTheClassStart()
 	return i;	 		
 }
 
-function equalityOperatorText(isInline: boolean)
+async function equalityOperatorText(isInline: boolean)
 {
 	
     var clasName: string = '';
@@ -125,7 +119,7 @@ function equalityOperatorText(isInline: boolean)
 	` +
 	"bool operator==(const " + utils.getClassName() + "&other) const" + `
 	{
-	` + equalityMembersText() + `
+	` + await equalityMembersText() + `
 	}
 
 	`
@@ -156,14 +150,13 @@ async function equalityMembersText()
 	var text: string = '';
 	for (var member of membersNames)
 	{
-		var variableName: string = member.split(' ')[1].trim();
 		if (member === membersNames[0])
 		{
-			text += "	return " + variableName + " == " + "other." + variableName;
+			text += "	return " + member + " == " + "other." + member;
 		}
 		else
 		{
-			text += "\n			&& " + variableName + " == " + "other." + variableName;
+			text += "\n			&& " + member + " == " + "other." + member;
 		}
 
 		if (member === membersNames[membersNames.length - 1])
