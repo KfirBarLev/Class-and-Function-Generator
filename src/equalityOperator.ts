@@ -7,13 +7,7 @@ export async function generateEqualityOperator()
 	if (!classMembers)
     {
         return;
-    }
-
-	for (let index = 0; index < classMembers.length; index++)
-	{
-		vscode.window.showInformationMessage(classMembers[index].label);
-	}
-	
+    }	
 	
     var putCodeAt = await utils.optionBoxsForWherePutTheCode();
     if (!putCodeAt)
@@ -150,9 +144,15 @@ function equalityOperatorText(isInline: boolean)
 }
 
 
-function equalityMembersText()
+async function equalityMembersText()
 {
-	var membersNames: string[] = getAllClassMembersWithType();
+	var membersNames = await optionBoxForClassMembers();
+
+	if (!membersNames)
+	{
+		return;
+	}
+
 	var text: string = '';
 	for (var member of membersNames)
 	{
@@ -198,8 +198,18 @@ async function optionBoxForClassMembers()
 		{title: "choose which class members include in the equality operators", 
 		canPickMany: true	
 	 });
-	
-	
 
-	return selection;
+	if (!selection)
+	{
+		return;
+	}
+
+	var pickedMembers: string[] = [];
+
+	for (let index = 0; index < selection.length; index++)
+	{
+		pickedMembers.push(selection[index].label);
+	} 				
+
+	return pickedMembers;
 }
