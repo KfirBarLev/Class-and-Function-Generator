@@ -8,6 +8,12 @@ export async function generateEqualityOperator()
     {
         return;
     }
+
+	for (let index = 0; index < classMembers.length; index++)
+	{
+		vscode.window.showInformationMessage(classMembers[index].label);
+	}
+	
 	
     var putCodeAt = await utils.optionBoxsForWherePutTheCode();
     if (!putCodeAt)
@@ -169,37 +175,25 @@ function equalityMembersText()
 	return text;
 }
 
-function optionBoxForClassMembers()
+async function optionBoxForClassMembers()
 {
 	let items: vscode.QuickPickItem[] = [];
 	var members: string[] = getAllClassMembersWithType();
-	var button: vscode.QuickInputButton[] = [];
+	
 	for (let index = 0; index < members.length; index++) 
 	{
 		var variableType: string = members[index].split(' ')[0].trim();
 		var variableName: string = members[index].split(' ')[1].trim();	
 
-		items.push({ label: variableName, description: variableType,
-			 picked: true, alwaysShow: true, buttons: button });
-		
+		items.push({ label: variableName, description: variableType,picked: true});	
 	}	
-
-	var option: vscode.QuickPickOptions = 
-	{
-        title: "choose which class members include in the equality operators",        	
+	
+	const selection = await vscode.window.showQuickPick(items, 
+		{title: "choose which class members include in the equality operators", 
 		canPickMany: true	
-	};
+	 });
+	
+	
 
-	return vscode.window.showQuickPick(items, option).then(selection => 
-	{
-		// the user canceled the selection
-		if (!selection) 
-		{
-			return;
-		}
-		else
-		{
-			return selection;
-		}
-	});
+	return selection;
 }
