@@ -82,15 +82,15 @@
 			  "class-generator.Generate": [
 				{
 				  "command": "class-generator.Getter",
-				  "group": "navigation@-4"
+				  "group": "getter@-4"
 				},
 				{
 					"command": "class-generator.Setter",
-					"group": "navigation@-3"
+					"group": "getter@-3"
 				},
 				{
 					"command": "class-generator.GetterAndSetter",
-					"group": "navigation@-2"
+					"group": "getter@-2"
 				},
 				{
 					"command": "class-generator.EqualityOperator",
