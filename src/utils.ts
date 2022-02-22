@@ -1,4 +1,5 @@
 import * as vscode from 'vscode';
+import * as fs from 'fs';
 
 export function getPositionForNewFunction(impInHeader: boolean = false) : number
 {
@@ -70,6 +71,51 @@ export function optionBoxsForWherePutTheCode()
 			{label: "suorce file", description: "decleration in header, implemntaion in source"}, 
 			{label: "header file", description: "decleration and implemntaion in header"}
 		], option);
+}
+
+export async function insertText(text: string[], location: string)
+{
+	var line  = getPositionForNewFunction();
+	if (!line) 
+	{
+		vscode.window.showErrorMessage('getPositionForNewFunction(); faild!');
+		return;
+	}
+
+	const editor = vscode.window.activeTextEditor;
+	if (!editor) 
+	{
+		return;
+	}
+	
+	const document = editor.document;
+	
+	switch (location)
+	{
+		case "inline":
+			editor.edit(edit => edit.insert(document.lineAt(line).range.end, text[0]));
+			break;
+		case "suorce file":
+			// write implemention in source file
+			var sourceName = document.fileName.replace("hpp", "cpp");
+			fs.appendFile(sourceName, text[0], function (err)
+			{
+				if (err) 
+				{
+					console.error(err);
+					return false;
+				}
+			});
+			// put defenition on header 
+			editor.edit(edit => edit.insert(document.lineAt(line).range.end, text[1]));
+			break;
+		case "header file":
+			// put defenition on header
+			await editor.edit(edit => edit.insert(document.lineAt(line).range.end, text[1]));
+			var endLine: number = getPositionForNewFunction(true);
+			await editor.edit(edit => edit.insert(document.lineAt(endLine).range.end, text[0]));
+			break;	
+	}
 }
 
 

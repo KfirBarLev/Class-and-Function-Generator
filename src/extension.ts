@@ -4,6 +4,7 @@ import * as vscode from 'vscode';
 import * as file from './classAndFileCreation';
 import * as getSet from './getterAndSetter';
 import * as equal from './equalityOperator';
+import * as out from './streamOutputOperator';
 
 // this method is called when your extension is activated
 // your extension is activated the very first time the command is executed
@@ -39,6 +40,9 @@ export function activate(context: vscode.ExtensionContext): void
 											
 	context.subscriptions.push(vscode.commands.registerCommand('class-generator.EqualityOperator', 
 											async (args) => equal.generateEqualityOperator()));
+
+	context.subscriptions.push(vscode.commands.registerCommand('class-generator.StreamOutputOperator', 
+											async (args) => out.generateStreamOutputOperator()));
 }
 
 // this method is called when your extension is deactivated

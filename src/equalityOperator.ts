@@ -1,6 +1,5 @@
 import * as vscode from 'vscode';
 import * as utils from './utils';
-import * as fs from 'fs';
 
 export async function generateEqualityOperator()
 {
@@ -11,46 +10,8 @@ export async function generateEqualityOperator()
     }
 	
 	var text: string[] = await equalityOperatorText("inline" === putCodeAt.label);
-	var line  = utils.getPositionForNewFunction();
-	if (!line) 
-	{
-		vscode.window.showErrorMessage('getPositionForNewFunction(); faild!');
-		return;
-	}
-	const editor = vscode.window.activeTextEditor;
-	if (!editor) 
-	{
-		return;
-	}
 	
-	const document = editor.document;
-	
-	switch (putCodeAt.label)
-		{
-			case "inline":
-				editor.edit(edit => edit.insert(document.lineAt(line).range.end, text[0]));
-				break;
-			case "suorce file":
-				// write implemention in source file
-				var sourceName = document.fileName.replace("hpp", "cpp");
-				fs.appendFile(sourceName, text[0], function (err)
-				{
-					if (err) 
-					{
-						console.error(err);
-						return false;
-					}
-				});
-				// put defenition on header 
-				editor.edit(edit => edit.insert(document.lineAt(line).range.end, text[1]));
-				break;
-			case "header file":
-				// put defenition on header
-				await editor.edit(edit => edit.insert(document.lineAt(line).range.end, text[1]));
-				var endLine: number = utils.getPositionForNewFunction(true);
-				await editor.edit(edit => edit.insert(document.lineAt(endLine).range.end, text[0]));
-				break;	
-		}
+	utils.insertText(text, putCodeAt.label);
 }
 
 
@@ -112,7 +73,7 @@ async function equalityOperatorText(isInline: boolean)
     var clasName: string = '';
 	var defenitionText = '';
 	var implementationText = '';
-
+	
 	if(!isInline)
 	{
 	clasName =  utils.getClassName();

@@ -46,6 +46,10 @@
 			  {
 				"command": "class-generator.EqualityOperator",
 				"title": "Equality Operators"
+			  },
+			  {
+				"command": "class-generator.StreamOutputOperator",
+				"title": "Stream Output Operator"
 			  }
 		  ],
 		  "menus": {
@@ -94,7 +98,11 @@
 				},
 				{
 					"command": "class-generator.EqualityOperator",
-					"group": "navigation@-1"
+					"group": "operator@-1"
+				},
+				{
+					"command": "class-generator.StreamOutputOperator",
+					"group": "operator@-2"
 				}
 			]
 			},

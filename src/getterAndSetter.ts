@@ -1,5 +1,4 @@
 import * as vscode from 'vscode';
-import * as fs from 'fs';
 import * as utils from './utils';
 
 export async function generateGetterSetter(funcName: string)
@@ -25,8 +24,7 @@ export async function generateGetterSetter(funcName: string)
 			return;
 		}
 
-		var wherePutTheCode: string = answer.label;
-		var isInline: boolean = (wherePutTheCode === "inline");
+		var isInline: boolean = (answer.label === "inline");
 
 		let codeText = generateGetterSetterAutomatically(textLine.text, funcName, isInline);
 		if (!codeText) 
@@ -35,45 +33,9 @@ export async function generateGetterSetter(funcName: string)
 			return;
 		}
 		
+		utils.insertText(codeText, answer.label);
 		
-		var line  = utils.getPositionForNewFunction();
-		if (!line) 
-		{
-			vscode.window.showErrorMessage('getPositionForNewFunction(); faild!');
-			return;
-		}
-	
-		let generatedText = codeText;
-		const document = editor.document;
-		
-		switch (wherePutTheCode)
-		{
-			case "inline":
-				editor.edit(edit => edit.insert(document.lineAt(line).range.end, generatedText[0]));
-				break;
-			case "suorce file":
-				// write implemention in source file
-				var sourceName = document.fileName.replace("hpp", "cpp");
-				fs.appendFile(sourceName, generatedText[0], function (err)
-				{
-					if (err) 
-					{
-						console.error(err);
-						return false;
-					}
-				});
-				// put defenition on header 
-				editor.edit(edit => edit.insert(document.lineAt(line).range.end, generatedText[1]));
-				break;
-			case "header file":
-				// put defenition on header
-				await editor.edit(edit => edit.insert(document.lineAt(line).range.end, generatedText[1]));
-				var endLine: number = utils.getPositionForNewFunction(true);
-				await editor.edit(edit => edit.insert(document.lineAt(endLine).range.end, generatedText[0]));
-				break;	
-		}
-		
-		vscode.window.showInformationMessage(funcName + " successfully created! " + wherePutTheCode);
+		vscode.window.showInformationMessage(funcName + " successfully created! " + answer.label);
 	}
 	else
 	{
