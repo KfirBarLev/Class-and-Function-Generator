@@ -1,7 +1,7 @@
 import * as vscode from 'vscode';
 import * as fs from 'fs';
 
-export function getPositionForNewFunction(location: string = "") : number // location = header end/includes/else is deafult
+export function getPositionForNewFunction(location: string = " ") : number // location = header end/includes/else is deafult
 {
 	var line: vscode.TextLine;
 	const editor = vscode.window.activeTextEditor;
@@ -16,7 +16,7 @@ export function getPositionForNewFunction(location: string = "") : number // loc
 	switch(location)
 	{
 		case "header end":
-			while (!line.text.includes("endif"))
+			while (!line.text.includes("#endif"))
 			{
 				i++;
 				line = editor.document.lineAt(i);

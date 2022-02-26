@@ -8,7 +8,7 @@ export async function generateStreamOutputOperator()
         return;
     }
 	
-	var text: string[] | undefined = await streamOutputOperatorText(true);
+	var text: string[] | undefined = await streamOutputOperatorText("inline" === putCodeAt.label);
     if (!text)
     {
         return;
@@ -18,7 +18,7 @@ export async function generateStreamOutputOperator()
 }
 
 
-async function streamOutputOperatorText(isInline: boolean)
+async function streamOutputOperatorText(isInline: boolean = false)
 {	
     var clasName: string = '';
 	var defenitionText = '';
@@ -29,33 +29,27 @@ async function streamOutputOperatorText(isInline: boolean)
 	
 	if(!isInline)
 	{
-// 		clasName =  utils.getClassName();
-// 		let membersText = await equalityMembersText();
-// 		if (!membersText)
-// 		{
-// 			return;
-// 		}
+		clasName =  utils.getClassName();
+		let membersText = await streamOutMembersText();
+		if (!membersText)
+		{
+			return;
+		}
 	
-// 	defenitionText =`
-// 	` +
-// 	"bool operator==(const " + clasName + " &other) const;\n" + 
-// 	"    bool operator!=(const " + clasName + " &other) const;\n"
-// 	; 
+	defenitionText =`
+	` +
+	"friend std::ostream &operator<<(std::ostream &os, const " + clasName + " &rhs);\n"
+	; 
 
-// implementationText =`
-// ` +
-// "bool " + clasName + "::operator==(const " + clasName + " &other) const" + `
-// {
-// ` + membersText + `
-// }
+implementationText =`
+` +
+"std::ostream &operator<<(std::ostream &os, const " + clasName + " &rhs)" + `
+{
+` + membersText + `
+}
 
-// `
-// + `bool ` + clasName + "::" + `operator!=(const ` + clasName +` &other) const  
-// { 
-// 	return !(*this == other); 
-// }
-// `
-// ;
+`
+;
 	}
 	else
 	{
@@ -101,11 +95,11 @@ async function streamOutMembersText(isInline: boolean = false)
 	{
 		if (member === membersNames[0])
 		{
-			text += "    os << " + "\"" + member + ":" + " \"" + "<< " + "rhs." + member;
+			text += "    os << " + "\"" + member + ":" + " \"" + " << " + "rhs." + member;
 		}
 		else
 		{
-			text += "\n" + tab + "	   << " + "\"" + member + ":" + " \"" + "<< " + "rhs." + member;
+			text += "\n" + tab + "	   << " + "\"" + member + ":" + " \"" + " << " + "rhs." + member;
 		}
 
 		if (member === membersNames[membersNames.length - 1])
