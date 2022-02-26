@@ -1,4 +1,3 @@
-import * as vscode from 'vscode';
 import * as utils from './utils';
 
 export async function generateEqualityOperator()
@@ -9,75 +8,32 @@ export async function generateEqualityOperator()
         return;
     }
 	
-	var text: string[] = await equalityOperatorText("inline" === putCodeAt.label);
+	var text: string[] | undefined = await equalityOperatorText("inline" === putCodeAt.label);
+	if (!text)
+    {
+        return;
+    }
 	
 	utils.insertText(text, putCodeAt.label);
 }
 
-
-function getAllClassMembersWithType()
-{
-	var lineText: vscode.TextLine;
-	const editor = vscode.window.activeTextEditor;
-	if (!editor) 
-	{
-		return [];
-	}
-
-	var lineNumber: number = getTheLineWhereTheClassStart();
-
-	lineText = editor.document.lineAt(lineNumber);
-	var classMembersName: string[] = [];
-	
-	while (!lineText.text.includes("};")) // while not in the end of the class
-	{
-		if (lineText.text.includes("m_") || lineText.text.includes("s_"))
-		{
-			let selectedText: string/* variableType: string, variableName: string*/;
-
-			selectedText = lineText.text.replace(';', '').trim(); //removes all semicolons 
-				
-			classMembersName.push(selectedText.trim());
-		}
-
-		lineNumber++;
-		lineText = editor.document.lineAt(lineNumber);
-	}
-
-	return classMembersName;	 		
-}
-
-function getTheLineWhereTheClassStart()
-{
-	var lineText: vscode.TextLine;
-	const editor = vscode.window.activeTextEditor;
-	if (!editor) 
-	{
-		return -1;
-	}
-
-	var i: number = editor.selection.active.line;
-	lineText = editor.document.lineAt(i);
-	
-	while (!lineText.text.includes("class") && 0 !== i)
-	{
-		i--;
-		lineText = editor.document.lineAt(i);
-	}
-
-	return i;	 		
-}
 
 async function equalityOperatorText(isInline: boolean)
 {	
     var clasName: string = '';
 	var defenitionText = '';
 	var implementationText = '';
+
+	
 	
 	if(!isInline)
 	{
-	clasName =  utils.getClassName();
-	
+		clasName =  utils.getClassName();
+		let membersText = await equalityMembersText();
+		if (!membersText)
+		{
+			return;
+		}
 	
 	defenitionText =`
 	` +
@@ -89,7 +45,7 @@ implementationText =`
 ` +
 "bool " + clasName + "::operator==(const " + clasName + " &other) const" + `
 {
-` + await equalityMembersText() + `
+` + membersText + `
 }
 
 `
@@ -102,12 +58,17 @@ implementationText =`
 	}
 	else
 	{
+		let membersText = await equalityMembersText(true);
+		if (!membersText)
+		{
+			return;
+		}
 
 	implementationText =`
 	` +
 	"bool operator==(const " + utils.getClassName() + "&other) const" + `
 	{
-	` + await equalityMembersText(true) + `
+	` + membersText + `
 	}
 
 	`
@@ -123,7 +84,6 @@ implementationText =`
 	return textArray;
 }
 
-
 async function equalityMembersText(isInline: boolean = false)
 {
 	var tab: string = "";
@@ -132,7 +92,7 @@ async function equalityMembersText(isInline: boolean = false)
 		tab = "    ";
 	}
 	
-	var membersNames = await optionBoxForClassMembers();
+	var membersNames = await utils.optionBoxForClassMembers();
 
 	if (!membersNames)
 	{
@@ -160,41 +120,3 @@ async function equalityMembersText(isInline: boolean = false)
 	return text;
 }
 
-async function optionBoxForClassMembers()
-{
-	let items: vscode.QuickPickItem[] = [];
-	var members: string[] = getAllClassMembersWithType();
-	
-	for (let index = 0; index < members.length; index++) 
-	{
-		var variableType: string = members[index].split(' ')[0].trim();
-		var variableName: string = members[index].split(' ')[1].trim();
-		
-		if (variableName[0] === '*' || variableName[0] === '&')
-		{
-			variableType += variableName[0];
-			variableName = variableName.replace(variableName[0], "").trim();
-		}
-
-		items.push({ label: variableName, description: variableType,picked: true});	
-	}	
-	
-	const selection = await vscode.window.showQuickPick(items, 
-		{title: "choose which class members include in the equality operators", 
-		canPickMany: true	
-	 });
-
-	if (!selection)
-	{
-		return;
-	}
-
-	var pickedMembers: string[] = [];
-
-	for (let index = 0; index < selection.length; index++)
-	{
-		pickedMembers.push(selection[index].label);
-	} 				
-
-	return pickedMembers;
-}
