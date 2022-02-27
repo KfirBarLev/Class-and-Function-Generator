@@ -48,7 +48,7 @@ async function constructorText(isInline: boolean)
 	; 
 
 implementationText =`
-		
+
 `+className+`::`+ className +`()
 {
 	
@@ -65,7 +65,6 @@ implementationText =`
 	{
 	  
 	}
-
 	`
 	;
 	}   
@@ -108,7 +107,6 @@ implementationText =`
 	{
 	  
 	}
-
 	`
 	;
 	}   
