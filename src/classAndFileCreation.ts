@@ -114,10 +114,10 @@ class ` + className +`
 	return ifndefHead + defaultInfo + ifndefEnd;			
 }
 
-export function cppText(name: string, createClass: boolean)
+export function cppText(nameClass: string, createClass: boolean)
 {
-	var className = name;
-	var hppName = name + ".hpp";
+	var className = nameClass;
+	var hppName = nameClass + ".hpp";
 	var cppBuffer = '';
 
 	if (createClass)
