@@ -15,6 +15,8 @@ export async function generateClassAndfiles(args: any, classCreate: boolean, fil
 			return;
 		}
 
+		await addToTarget(res, fileType);
+
 		if(!file.canContinue(res))
 		{ 
 			return;
@@ -53,6 +55,29 @@ export async function generateClassAndfiles(args: any, classCreate: boolean, fil
 		{
 			vscode.window.showInformationMessage(res + " not created!");
 		}		
+}
+
+async function addToTarget(fileName: string, fileType: string) // fileType = cpp/hpp/both
+{
+	// items.push({ label: variableName, description: variableType,picked: true});	
+	// }	
+	let item: vscode.QuickPickItem[] =[];
+	item.push({label: "add to target",
+		description: "add files to 'add_executable' in CMakeList.txt if exists in current folder",
+	});
+	
+
+	const selection = await vscode.window.showQuickPick(item, 
+		{title: "select if you want to add the files to the CMakeList.txt ('add_executable')", 
+		canPickMany: true	
+	 });
+
+	if (!selection || selection.length === 0)
+	{
+		return;
+	}
+
+	//TODO: add files name to the CMakeLists.txt
 }
 
 
