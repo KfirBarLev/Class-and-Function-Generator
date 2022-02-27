@@ -5,6 +5,7 @@ import * as file from './classAndFileCreation';
 import * as getSet from './getterAndSetter';
 import * as equal from './equalityOperator';
 import * as out from './streamOutputOperator';
+import * as cd from './constructorDestructor';
 
 // this method is called when your extension is activated
 // your extension is activated the very first time the command is executed
@@ -43,6 +44,12 @@ export function activate(context: vscode.ExtensionContext): void
 
 	context.subscriptions.push(vscode.commands.registerCommand('class-generator.StreamOutputOperator', 
 											async (args) => out.generateStreamOutputOperator()));
+	
+	context.subscriptions.push(vscode.commands.registerCommand('class-generator.Constructor', 
+											async (args) => cd.generateConstructor()));
+
+	context.subscriptions.push(vscode.commands.registerCommand('class-generator.Destructor', 
+											async (args) => cd.generateDestructor()));
 }
 
 // this method is called when your extension is deactivated

@@ -50,6 +50,14 @@
 			  {
 				"command": "class-generator.StreamOutputOperator",
 				"title": "Stream Output Operator"
+			  },
+			  {
+				"command": "class-generator.Destructor",
+				"title": "Destructor"
+			  },
+			  {
+				"command": "class-generator.Constructor",
+				"title": "Constructor"
 			  }
 		  ],
 		  "menus": {
@@ -103,6 +111,14 @@
 				{
 					"command": "class-generator.StreamOutputOperator",
 					"group": "operator@-2"
+				},
+				{
+					"command": "class-generator.Destructor",
+					"group": "class@-1"
+				},
+				{
+					"command": "class-generator.Constructor",
+					"group": "class@-2"
 				}
 			]
 			},
