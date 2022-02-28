@@ -2,7 +2,7 @@ import * as vscode from 'vscode';
 import * as fs from 'fs';
 import * as path from 'path';
 import * as file from './classAndFileCreation';
-
+import * as utils from './utils';
 
 export async function generateClassAndfiles(args: any, classCreate: boolean, fileType: string)
 {
@@ -15,7 +15,7 @@ export async function generateClassAndfiles(args: any, classCreate: boolean, fil
 			return;
 		}
 
-		await addToTarget(res, fileType);
+		
 
 		if(!file.canContinue(res))
 		{ 
@@ -43,7 +43,7 @@ export async function generateClassAndfiles(args: any, classCreate: boolean, fil
 		{
 			dir = vscode.workspace.rootPath as string; // use workspace path
 		}
-
+		await addToTarget(res, fileType,dir as string);
 		var out = file.createClass(res as unknown as string, dir as string, classCreate, fileType); 
 
 		// Display a message box to the user
@@ -57,7 +57,7 @@ export async function generateClassAndfiles(args: any, classCreate: boolean, fil
 		}		
 }
 
-async function addToTarget(fileName: string, fileType: string) // fileType = cpp/hpp/both
+async function addToTarget(fileName: string, fileType: string, pathDir: string) // fileType = cpp/hpp/both
 {
 	// items.push({ label: variableName, description: variableType,picked: true});	
 	// }	
@@ -71,13 +71,53 @@ async function addToTarget(fileName: string, fileType: string) // fileType = cpp
 		{title: "select if you want to add the files to the CMakeList.txt ('add_executable')", 
 		canPickMany: true	
 	 });
-
+	 
 	if (!selection || selection.length === 0)
 	{
 		return;
 	}
+	
 
+	
 	//TODO: add files name to the CMakeLists.txt
+	
+	const editor = await vscode.workspace.openTextDocument(pathDir + "\\" + "CMakeLists.txt");
+	
+	if (!editor)
+	{
+		vscode.window.showInformationMessage("file not found");
+		return;
+	}
+	
+	let lineNumber: number = 0;
+	let textLine: vscode.TextLine = editor.lineAt(lineNumber);
+	
+	while (!textLine.text.includes("add_executable"))
+	{
+		++lineNumber;
+		textLine = editor.lineAt(lineNumber);
+	}
+	let pos = textLine.text.lastIndexOf(")");
+	let textToInsert: string = "";
+
+	switch(fileType)
+	{
+		case "hpp":
+			textToInsert = ", " + fileName + ".hpp"; 
+			break;
+		case "cpp":
+			textToInsert = ", " + fileName + ".cpp";
+			break;
+		case "both":
+			textToInsert = ", " + fileName + ".cpp, " +  fileName + ".hpp";
+			break;
+	}	
+	
+	let uri = vscode.Uri.file(pathDir + "\\" + "CMakeLists.txt");
+	
+	const edit = new vscode.WorkspaceEdit();
+	edit.insert(uri, new vscode.Position(lineNumber, pos), textToInsert);
+	await vscode.workspace.applyEdit(edit);
 }
 
 
