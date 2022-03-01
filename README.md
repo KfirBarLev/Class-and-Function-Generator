@@ -5,18 +5,13 @@
 this extension generate for you files, class and function.
 
 ## Features
-Describe specific features of your extension including screenshots of your extension in action. Image paths are relative to this README file.
+this extension add 2 main features to your menu.
 
-For example if there is an image subfolder under your extension project workspace:
-
+1. is the 'NEW' menu when Right-click on the 'EXPLORER' menu.
 ![feature X](./images/new_menu.png)
 
-> Tip: Many popular extensions utilize animations. This is an excellent way to show off your extension! We recommend short, focused animations that are easy to follow.
-
-this extension add two main features to your menu.
-1. is the 'NEW' menu when Right-click on the 'EXPLORER' menu.
-
-\!\[feature X\]\(images/feature-x.png\)
+2. is the 'Generate' menu when Right-click on the code area.
+![feature X](./images/generate_menu.png)
 
 ## Requirements
 
