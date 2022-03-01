@@ -2,7 +2,7 @@
 	"name": "class-generator",
 	  "displayName": "Class_Generator",
 	  "description": "create class and generate function for the class",
-	  "version": "0.0.1",
+	  "version": "1.0.0",
 	  "engines": {
 		  "vscode": "^1.63.0"
 	  },
@@ -12,6 +12,15 @@
 	  "activationEvents": [
 		  "onStartupFinished"
 	  ],
+	  "publisher": "kfirbar",
+  "author": {
+    "name": "Kfir Bar Lev",
+    "url": "https://github.com/KfirBarLev/"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/KfirBarLev/Class-and-Function-Generator"
+  },
 	  "main": "./out/extension.js",
 	  "contributes": {
 		  "commands": [
