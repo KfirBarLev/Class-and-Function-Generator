@@ -1,15 +1,22 @@
 # class-generator README
 
-This is the README for your extension "class-generator". After writing up a brief description, we recommend including the following sections.
+<!-- This is the README for your extension "class-generator". After writing up a brief description, we recommend including the following sections. -->
+
+this extension generate for you files, class and function.
 
 ## Features
 Describe specific features of your extension including screenshots of your extension in action. Image paths are relative to this README file.
 
 For example if there is an image subfolder under your extension project workspace:
 
-\!\[feature X\]\(images/feature-x.png\)
+\!\[feature X\]\(images/new_menu.png\)
 
 > Tip: Many popular extensions utilize animations. This is an excellent way to show off your extension! We recommend short, focused animations that are easy to follow.
+
+this extension add two main features to your menu.
+1. is the 'NEW' menu when Right-click on the 'EXPLORER' menu.
+
+\!\[feature X\]\(images/feature-x.png\)
 
 ## Requirements
 
