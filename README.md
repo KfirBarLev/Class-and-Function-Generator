@@ -1,71 +1,37 @@
 # class-generator README
-
-<!-- This is the README for your extension "class-generator". After writing up a brief description, we recommend including the following sections. -->
-
 this extension generate for you files, class and function.
 
 ## Features
 this extension add 2 main features to your menu.
 
-1. is the 'NEW' menu when Right-click on the 'EXPLORER' menu.
+1. the 'NEW' menu when Right-click on the 'EXPLORER' menu.
+
 ![feature X](./images/new_menu.png)
 
-2. is the 'Generate' menu when Right-click on the code area.
+after choosing what kind of file/class to create, you have the option with input box to choose if add the files to the CMakeLists.txt.
+
+2. the 'Generate' menu when Right-click on the code area.
+
 ![feature X](./images/generate_menu.png)
+
+after choosing what kind of function to generate, you also can choose where you want the implementation (inline/source/header), and witch class members to include in that function.
+
 
 ## Requirements
 
-If you have any requirements or dependencies, add a section describing those and how to install and configure them.
+1. the class members must start with m_.
+2. they must be under 'private:'.
+3. if you want to add to CMakeLists.txt, he nust have the 'add_exacutable()' written.
 
-## Extension Settings
-
-Include if your extension adds any VS Code settings through the `contributes.configuration` extension point.
-
-For example:
-
-This extension contributes the following settings:
-
-* `myExtension.enable`: enable/disable this extension
-* `myExtension.thing`: set to `blah` to do something
-
-## Known Issues
-
-Calling out known issues can help limit users opening duplicate issues against your extension.
 
 ## Release Notes
 
-Users appreciate release notes as you update your extension.
 
 ### 1.0.0
 
 Initial release of ...
 
-### 1.0.1
-
-Fixed issue #.
-
-### 1.1.0
-
-Added features X, Y, and Z.
 
 -----------------------------------------------------------------------------------------------------------
-## Following extension guidelines
-
-Ensure that you've read through the extensions guidelines and follow the best practices for creating your extension.
-
-* [Extension Guidelines](https://code.visualstudio.com/api/references/extension-guidelines)
-
-## Working with Markdown
-
-**Note:** You can author your README using Visual Studio Code.  Here are some useful editor keyboard shortcuts:
-
-* Split the editor (`Cmd+\` on macOS or `Ctrl+\` on Windows and Linux)
-* Toggle preview (`Shift+CMD+V` on macOS or `Shift+Ctrl+V` on Windows and Linux)
-* Press `Ctrl+Space` (Windows, Linux) or `Cmd+Space` (macOS) to see a list of Markdown snippets
-
-### For more information
-
-* [Visual Studio Code's Markdown Support](http://code.visualstudio.com/docs/languages/markdown)
-* [Markdown Syntax Reference](https://help.github.com/articles/markdown-basics/)
 
 **Enjoy!**
