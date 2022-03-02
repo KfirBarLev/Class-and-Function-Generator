@@ -44,12 +44,16 @@ export function activate(context: vscode.ExtensionContext): void
 
 	context.subscriptions.push(vscode.commands.registerCommand('class-generator.StreamOutputOperator', 
 											async (args) => out.generateStreamOutputOperator()));
+
+	context.subscriptions.push(vscode.commands.registerCommand('class-generator.RelationalOperators', 
+											async (args) => out.generateStreamOutputOperator()));
 	
 	context.subscriptions.push(vscode.commands.registerCommand('class-generator.Constructor', 
 											async (args) => cd.generateConstructor()));
 
 	context.subscriptions.push(vscode.commands.registerCommand('class-generator.Destructor', 
 											async (args) => cd.generateDestructor()));
+										
 }
 
 // this method is called when your extension is deactivated

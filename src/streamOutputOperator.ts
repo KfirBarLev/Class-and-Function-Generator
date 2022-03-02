@@ -24,8 +24,6 @@ async function streamOutputOperatorText(isInline: boolean = false)
 	var defenitionText = '';
 	var implementationText = '';
     var includeString: string = "#include <ostream>\n";
-
-	
 	
 	if(!isInline)
 	{

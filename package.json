@@ -67,6 +67,10 @@
 			  {
 				"command": "class-generator.Constructor",
 				"title": "Constructor"
+			  },
+			  {
+				"command": "class-generator.RelationalOperators",
+				"title": "Relational Operators"
 			  }
 		  ],
 		  "menus": {
@@ -118,8 +122,12 @@
 					"group": "operator@-1"
 				},
 				{
-					"command": "class-generator.StreamOutputOperator",
+					"command": "class-generator.RelationalOperators",
 					"group": "operator@-2"
+				},
+				{
+					"command": "class-generator.StreamOutputOperator",
+					"group": "operator@-3"
 				},
 				{
 					"command": "class-generator.Destructor",
