@@ -12,7 +12,7 @@
 	  "activationEvents": [
 		  "onStartupFinished"
 	  ],
-	  "publisher": "kfirbar",
+	  "publisher": "KfirBarLev",
   "author": {
     "name": "Kfir Bar Lev",
     "url": "https://github.com/KfirBarLev/"

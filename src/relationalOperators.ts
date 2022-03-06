@@ -1,78 +1,96 @@
 import * as utils from './utils';
 import * as vscode from 'vscode';
+
 export async function generateRelationalOperator()
 {
-    vscode.window.showInformationMessage("generate Relationa lOperator succes!!");
-    // var putCodeAt = await utils.optionBoxsForWherePutTheCode();
-    // if (!putCodeAt)
-    // {
-    //     return;
-    // }
+    var putCodeAt = await utils.optionBoxsForWherePutTheCode();
+    if (!putCodeAt)
+    {
+        return;
+    }
 	
-	// var text: string[] | undefined = await relationalOperatorText("inline" === putCodeAt.label);
-    // if (!text)
-    // {
-    //     return;
-    // }
+	var text: string[] | undefined = await relationalOperatorText("inline" === putCodeAt.label);
+    if (!text)
+    {
+        return;
+    }
 
-	// utils.insertText(text, putCodeAt.label);
+	utils.insertText(text, putCodeAt.label);
 }
 
 async function relationalOperatorText(isInline: boolean = false)
 {
-//     var clasName: string = '';
-// 	var defenitionText = '';
-// 	var implementationText = '';
-//     var includeString: string = "#include <ostream>\n";
+    var clasName: string = utils.getClassName();
+	var defenitionText = '';
+	var implementationText = '';
 	
-// 	if(!isInline)
-// 	{
-// 		clasName =  utils.getClassName();
-// 		let membersText = await relationalMembersText();
-// 		if (!membersText)
-// 		{
-// 			return;
-// 		}
+	if(!isInline)
+	{
+		let membersText = await relationalMembersText();
+		if (!membersText)
+		{
+			return;
+		}
 	
-// 	defenitionText =`
-// 	` +
-// 	"friend std::ostream &operator<<(std::ostream &os, const " + clasName + " &rhs);\n"
-// 	; 
+	defenitionText =`
+	` +
+	`bool operator<(const ` + clasName + ` &other) const;
+	bool operator>(const ` + clasName + ` &other) const;
+	bool operator<=(const ` + clasName + ` &other) const;
+	bool operator>=(const ` + clasName + ` &other) const;
+	`
+	; 
 
-// implementationText =`
-// ` +
-// "std::ostream &operator<<(std::ostream &os, const " + clasName + " &rhs)" + `
-// {
-// ` + membersText + `
-// }
+implementationText =`
+` +
+"bool " + clasName + "::operator<(const BankAccount &other) const" + `
+{` + membersText + `
+}
 
-// `
-// ;
-// 	}
-// 	else
-// 	{
-// 		let membersText = await relationalMembersText(true);
-// 		if (!membersText)
-// 		{
-// 			return;
-// 		}
+` +
+`bool ` + clasName + `::operator>(const ` + clasName + ` &other) const 
+{
+	return other < *this;
+}
+
+bool ` + clasName + `::operator<=(const ` + clasName + ` &other) const 
+{
+	return !(other < *this);
+}
+
+bool ` + clasName + `::operator>=(const ` + clasName + ` &other) const 
+{
+	return !(*this < other);
+}
+
+`
+;
+	}
+	else
+	{
+		let membersText = await relationalMembersText(true);
+		if (!membersText)
+		{
+			return;
+		}
         
-// 	implementationText =`
-// 	` + 
-// 	"friend std::ostream &operator<<(std::ostream &os, const " + utils.getClassName() + " &rhs)" + `
-// 	{
-// 	` + membersText + `
-// 	}
-// 	`;
-// 	}   
+	implementationText =`
+	` + 
+	"bool operator<(const " + clasName + " &other) const" + `
+	{` + membersText + `
+	}
+	` +
+	`bool operator>(const ` + clasName + `&other) const { return other < *this; }
+	bool operator<=(const ` + clasName +  ` &other) const { return !(other < *this); }
+	bool operator>=(const ` + clasName  + ` &other) const { return !(*this < other); }
+	`;
+	}   
      
-// 	let textArray: string[] = [];
-// 	textArray[0] = implementationText;
-// 	textArray[1] = defenitionText;
-//     textArray[2] = includeString;
+	let textArray: string[] = [];
+	textArray[0] = implementationText;
+	textArray[1] = defenitionText;
 
-// 	return textArray;
-return ["im relatioal operator"];
+	return textArray;
 }
 
 async function relationalMembersText(isInline: boolean = false)
@@ -92,20 +110,17 @@ async function relationalMembersText(isInline: boolean = false)
 	var text: string = '';
 	for (var member of membersNames)
 	{
-		if (member === membersNames[0])
-		{
-			text += "    os << " + "\"" + member + ":" + " \"" + " << " + "rhs." + member;
-		}
-		else
-		{
-			text += "\n" + tab + "	   << " + "\"" + member + ":" + " \"" + " << " + "rhs." + member;
-		}
-
 		if (member === membersNames[membersNames.length - 1])
 		{
-			text += ";";
-            text += "\n" + tab + "    return os;";
+			
+            text += "\n" + tab +  "	return " + member + " < " + "other." + member + ";";
+			break;
 		}
+		
+		text += "\n" + tab +  "	if (" + member + " < " + "other." + member + ")" +
+				"\n" + tab +  "		return true;" +
+				"\n" + tab +  " 	if (other." + member + " < " + member + ")" +
+				"\n" + tab +  "		return false;";    	
 	}
 
 	return text;
