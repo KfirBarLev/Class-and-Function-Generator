@@ -2,7 +2,7 @@
 	"name": "class-generator",
 	  "displayName": "Class_Generator",
 	  "description": "create class and generate function for the class",
-	  "version": "1.0.0",
+	  "version": "2.0.0",
 	  "engines": {
 		  "vscode": "^1.63.0"
 	  },
